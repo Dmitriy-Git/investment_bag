@@ -1,7 +1,9 @@
 import { Module, Global } from "@nestjs/common";
 import { ConfigModule } from "@nestjs/config";
 import { UserModule } from "./user/user.module";
+import { TInvestModule } from "./t-invest/t-invest.module";
 import { PrismaService } from "./common/prisma.service";
+import { HttpErrorHandlerService } from "./common/http-error-handler.service";
 
 @Global()
 @Module({
@@ -11,8 +13,9 @@ import { PrismaService } from "./common/prisma.service";
       envFilePath: ".env", // путь к файлу .env
     }),
     UserModule,
+    TInvestModule,
   ],
-  providers: [PrismaService],
-  exports: [PrismaService],
+  providers: [PrismaService, HttpErrorHandlerService],
+  exports: [PrismaService, HttpErrorHandlerService],
 })
 export class AppModule {}
