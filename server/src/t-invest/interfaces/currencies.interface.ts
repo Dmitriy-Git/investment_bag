@@ -7,11 +7,12 @@ import {
   InstrumentStatus,
   InstrumentExchange,
 } from './common.interface';
+import { PaginationParams } from '../../common/pagination.interface';
 
 /**
  * Параметры запроса списка валют
  */
-export interface GetCurrenciesRequest {
+export interface GetCurrenciesRequest extends PaginationParams {
   instrumentStatus?: InstrumentStatus;
   instrumentExchange?: InstrumentExchange;
 }
@@ -44,4 +45,3 @@ export interface Currency {
 export interface GetCurrenciesResponse {
   instruments: Currency[];
 }
-
