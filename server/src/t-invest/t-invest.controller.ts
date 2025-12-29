@@ -1,15 +1,17 @@
-import { Controller, Get, Query } from '@nestjs/common';
+import { Controller, Get, Query, UseFilters } from '@nestjs/common';
 import { TInvestService } from './t-invest.service';
 import { GetCurrenciesResponse } from './interfaces/currencies.interface';
 import {
   InstrumentStatus,
   InstrumentExchange,
 } from './interfaces/common.interface';
+import { AllExceptionsFilter } from '../common/all-exception.filter';
 
 /**
  * Контроллер для работы с T-Invest API
  */
 @Controller('t-invest')
+@UseFilters(AllExceptionsFilter)
 export class TInvestController {
   constructor(private readonly tInvestService: TInvestService) {}
 

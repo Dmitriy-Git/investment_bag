@@ -3,7 +3,6 @@ import { ConfigModule } from "@nestjs/config";
 import { UserModule } from "./user/user.module";
 import { TInvestModule } from "./t-invest/t-invest.module";
 import { PrismaService } from "./common/prisma.service";
-import { HttpErrorHandlerService } from "./common/http-error-handler.service";
 
 @Global()
 @Module({
@@ -15,7 +14,7 @@ import { HttpErrorHandlerService } from "./common/http-error-handler.service";
     UserModule,
     TInvestModule,
   ],
-  providers: [PrismaService, HttpErrorHandlerService],
-  exports: [PrismaService, HttpErrorHandlerService],
+  providers: [PrismaService],
+  exports: [PrismaService],
 })
 export class AppModule {}
