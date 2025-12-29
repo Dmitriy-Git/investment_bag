@@ -1,4 +1,4 @@
-import { Injectable, Logger } from "@nestjs/common";
+import { Injectable } from "@nestjs/common";
 import { HttpService } from "@nestjs/axios";
 import { firstValueFrom } from "rxjs";
 import { TInvestConfig } from "./t-invest.config";
@@ -16,7 +16,6 @@ import {
  */
 @Injectable()
 export class TInvestService {
-  private readonly logger = new Logger(TInvestService.name);
 
   constructor(
     private readonly httpService: HttpService,
@@ -41,8 +40,6 @@ export class TInvestService {
       instrumentExchange:
         params?.instrumentExchange || InstrumentExchange.UNSPECIFIED,
     };
-
-    this.logger.debug(`Making POST request to ${url}`);
 
     const response = await firstValueFrom(
       this.httpService.post<GetCurrenciesResponse>(url, requestBody, {
