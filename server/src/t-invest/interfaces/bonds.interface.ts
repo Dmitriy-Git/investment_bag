@@ -70,3 +70,19 @@ export interface GetBondsResponse {
   instruments: Bond[];
 }
 
+/**
+ * Параметры запроса получения одной облигации
+ */
+export interface GetBondByRequest {
+  idType: string;
+  id: string;
+  classCode?: string;
+}
+
+/**
+ * Ответ API с информацией об одной облигации
+ */
+export interface GetBondByResponse {
+  instrument: Bond;
+}
+

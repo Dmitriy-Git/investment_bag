@@ -45,3 +45,19 @@ export interface Currency {
 export interface GetCurrenciesResponse {
   instruments: Currency[];
 }
+
+/**
+ * Параметры запроса получения одной валюты
+ */
+export interface GetCurrencyByRequest {
+  idType: string;
+  id: string;
+  classCode?: string;
+}
+
+/**
+ * Ответ API с информацией об одной валюте
+ */
+export interface GetCurrencyByResponse {
+  instrument: Currency;
+}

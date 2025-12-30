@@ -22,3 +22,15 @@ export enum InstrumentExchange {
   DEALER = 'INSTRUMENT_EXCHANGE_DEALER',
 }
 
+/**
+ * Тип идентификатора инструмента
+ * Используется для указания способа идентификации инструмента
+ */
+export enum InstrumentIdType {
+  UNSPECIFIED = 'INSTRUMENT_ID_UNSPECIFIED',
+  FIGI = 'INSTRUMENT_ID_TYPE_FIGI',
+  TICKER = 'INSTRUMENT_ID_TYPE_TICKER',
+  UID = 'INSTRUMENT_ID_TYPE_UID',
+  POSITION_UID = 'INSTRUMENT_ID_TYPE_POSITION_UID',
+}
+

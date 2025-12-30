@@ -6,13 +6,18 @@ import {
   Currency,
   GetCurrenciesRequest,
   GetCurrenciesResponse,
+  GetCurrencyByRequest,
+  GetCurrencyByResponse,
 } from "./interfaces/currencies.interface";
 import {
   Bond,
   GetBondsRequest,
   GetBondsResponse,
+  GetBondByRequest,
+  GetBondByResponse,
 } from "./interfaces/bonds.interface";
 import {
+  InstrumentIdType,
   InstrumentStatus,
   InstrumentExchange,
 } from "./interfaces/common.interface";
@@ -123,5 +128,55 @@ export class TInvestService {
       next: page < totalPages ? page + 1 : null,
       prev: page > 1 ? page - 1 : null,
     };
+  }
+
+  /**
+   * Получить информацию об одной облигации по идентификатору
+   * @param params Параметры запроса
+   * @returns Информация об облигации
+   * @throws HttpException при ошибке запроса к API
+   */
+  async getBondBy(params: GetBondByRequest): Promise<Bond> {
+    const url = `${this.config.getApiUrl()}.InstrumentsService/BondBy`;
+    const headers = this.config.getHeaders();
+
+    const requestBody: GetBondByRequest = {
+      idType: params.idType || InstrumentIdType.UID,
+      id: params.id,
+      ...(params.classCode && { classCode: params.classCode }),
+    };
+
+    const response = await firstValueFrom(
+      this.httpService.post<GetBondByResponse>(url, requestBody, {
+        headers,
+      })
+    );
+
+    return response.data.instrument;
+  }
+
+  /**
+   * Получить информацию об одной валюте по идентификатору
+   * @param params Параметры запроса
+   * @returns Информация о валюте
+   * @throws HttpException при ошибке запроса к API
+   */
+  async getCurrencyBy(params: GetCurrencyByRequest): Promise<Currency> {
+    const url = `${this.config.getApiUrl()}.InstrumentsService/CurrencyBy`;
+    const headers = this.config.getHeaders();
+
+    const requestBody: GetCurrencyByRequest = {
+      idType: params.idType || InstrumentIdType.UID,
+      id: params.id,
+      ...(params.classCode && { classCode: params.classCode }),
+    };
+
+    const response = await firstValueFrom(
+      this.httpService.post<GetCurrencyByResponse>(url, requestBody, {
+        headers,
+      })
+    );
+
+    return response.data.instrument;
   }
 }

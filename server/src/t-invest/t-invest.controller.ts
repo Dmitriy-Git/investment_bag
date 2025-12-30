@@ -1,8 +1,9 @@
-import { Controller, Get, Query, UseFilters } from '@nestjs/common';
+import { Controller, Get, Query, Param, UseFilters } from '@nestjs/common';
 import { TInvestService } from './t-invest.service';
 import { Currency } from './interfaces/currencies.interface';
 import { Bond } from './interfaces/bonds.interface';
 import {
+  InstrumentIdType,
   InstrumentStatus,
   InstrumentExchange,
 } from './interfaces/common.interface';
@@ -113,6 +114,50 @@ export class TInvestController {
     return this.tInvestService.getBonds(
       Object.keys(params).length > 0 ? params : undefined,
     );
+  }
+
+  /**
+   * Получить информацию об одной облигации по идентификатору
+   * @param id Идентификатор облигации (FIGI, Ticker, UID или Position UID)
+   * @param idType Тип идентификатора (FIGI, TICKER, UID, POSITION_UID)
+   * @param classCode Класс инструмента (обязателен при idType=TICKER)
+   * @returns Информация об облигации
+   */
+  @Get('bonds/:id')
+  async getBondBy(
+    @Param('id') id: string,
+    @Query('idType') idType?: string,
+    @Query('classCode') classCode?: string,
+  ): Promise<Bond> {
+    const requestParams = {
+      idType: (idType as InstrumentIdType) || InstrumentIdType.UID,
+      id,
+      ...(classCode && { classCode }),
+    };
+
+    return this.tInvestService.getBondBy(requestParams);
+  }
+
+  /**
+   * Получить информацию об одной валюте по идентификатору
+   * @param id Идентификатор валюты (FIGI, Ticker, UID или Position UID)
+   * @param idType Тип идентификатора (FIGI, TICKER, UID, POSITION_UID)
+   * @param classCode Класс инструмента (обязателен при idType=TICKER)
+   * @returns Информация о валюте
+   */
+  @Get('currencies/:id')
+  async getCurrencyBy(
+    @Param('id') id: string,
+    @Query('idType') idType?: string,
+    @Query('classCode') classCode?: string,
+  ): Promise<Currency> {
+    const requestParams = {
+      idType: (idType as InstrumentIdType) || InstrumentIdType.UID,
+      id,
+      ...(classCode && { classCode }),
+    };
+
+    return this.tInvestService.getCurrencyBy(requestParams);
   }
 }
 
