@@ -1,4 +1,11 @@
-import { Controller, Get, Query, Param, UseFilters } from '@nestjs/common';
+import {
+  Get,
+  Query,
+  Param,
+  UseFilters,
+  Controller,
+  BadRequestException,
+} from '@nestjs/common';
 import { TInvestService } from './t-invest.service';
 import { Currency } from './interfaces/currencies.interface';
 import { Bond } from './interfaces/bonds.interface';
@@ -7,6 +14,10 @@ import {
   InstrumentStatus,
   InstrumentExchange,
 } from './interfaces/common.interface';
+import {
+  InstrumentKind,
+  FindInstrumentResponse,
+} from './interfaces/instruments.interface';
 import { AllExceptionsFilter } from '../common/all-exception.filter';
 import { PaginatedResponse } from '../common/pagination.interface';
 
@@ -158,6 +169,35 @@ export class TInvestController {
     };
 
     return this.tInvestService.getCurrencyBy(requestParams);
+  }
+
+  /**
+   * Поиск инструментов по запросу
+   * @param query Строка поиска
+   * @param instrumentKind Тип инструмента (опционально)
+   * @returns Список найденных инструментов
+   */
+  @Get('instruments/search')
+  async findInstrument(
+    @Query('query') query: string,
+    @Query('instrumentKind') instrumentKind?: string,
+  ): Promise<FindInstrumentResponse> {
+    if (!query || query.trim() === '') {
+      throw new BadRequestException('Query parameter is required');
+    }
+
+    const requestParams: {
+      query: string;
+      instrumentKind?: InstrumentKind;
+    } = {
+      query: query.trim(),
+    };
+
+    if (instrumentKind) {
+      requestParams.instrumentKind = instrumentKind as InstrumentKind;
+    }
+
+    return this.tInvestService.findInstrument(requestParams);
   }
 }
 

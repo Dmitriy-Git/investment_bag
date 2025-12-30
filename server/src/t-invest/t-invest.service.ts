@@ -21,6 +21,11 @@ import {
   InstrumentStatus,
   InstrumentExchange,
 } from "./interfaces/common.interface";
+import {
+  Instrument,
+  FindInstrumentRequest,
+  FindInstrumentResponse,
+} from "./interfaces/instruments.interface";
 import { PaginatedResponse } from "../common/pagination.interface";
 
 /**
@@ -178,5 +183,31 @@ export class TInvestService {
     );
 
     return response.data.instrument;
+  }
+
+  /**
+   * Поиск инструментов по запросу
+   * @param params Параметры запроса поиска
+   * @returns Список найденных инструментов
+   * @throws HttpException при ошибке запроса к API
+   */
+  async findInstrument(
+    params: FindInstrumentRequest
+  ): Promise<FindInstrumentResponse> {
+    const url = `${this.config.getApiUrl()}.InstrumentsService/FindInstrument`;
+    const headers = this.config.getHeaders();
+
+    const requestBody: FindInstrumentRequest = {
+      query: params.query,
+      ...(params.instrumentKind && { instrumentKind: params.instrumentKind }),
+    };
+
+    const response = await firstValueFrom(
+      this.httpService.post<FindInstrumentResponse>(url, requestBody, {
+        headers,
+      })
+    );
+
+    return { instruments: response.data.instruments }
   }
 }
