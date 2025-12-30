@@ -4,27 +4,30 @@ import {
   Param,
   UseFilters,
   Controller,
-  BadRequestException,
-} from '@nestjs/common';
-import { TInvestService } from './t-invest.service';
-import { Currency } from './interfaces/currencies.interface';
-import { Bond } from './interfaces/bonds.interface';
+  ParseIntPipe,
+  ParseEnumPipe,
+  DefaultValuePipe,
+} from "@nestjs/common";
+import { TInvestService } from "./t-invest.service";
+import { Currency } from "./interfaces/currencies.interface";
+import { Bond } from "./interfaces/bonds.interface";
 import {
   InstrumentIdType,
   InstrumentStatus,
   InstrumentExchange,
-} from './interfaces/common.interface';
+} from "./interfaces/common.interface";
 import {
   InstrumentKind,
   FindInstrumentResponse,
-} from './interfaces/instruments.interface';
-import { AllExceptionsFilter } from '../common/all-exception.filter';
-import { PaginatedResponse } from '../common/pagination.interface';
+} from "./interfaces/instruments.interface";
+import { AllExceptionsFilter } from "../common/all-exception.filter";
+import { PaginatedResponse } from "../common/pagination.interface";
+import { ParseStringPipe } from "../common/parse-string.pipe";
 
 /**
  * Контроллер для работы с T-Invest API
  */
-@Controller('t-invest')
+@Controller("t-invest")
 @UseFilters(AllExceptionsFilter)
 export class TInvestController {
   constructor(private readonly tInvestService: TInvestService) {}
@@ -37,44 +40,48 @@ export class TInvestController {
    * @param limit Количество элементов на странице
    * @returns Список валют
    */
-  @Get('currencies')
+  @Get("currencies")
   async getCurrencies(
-    @Query('instrumentStatus') instrumentStatus?: string,
-    @Query('instrumentExchange') instrumentExchange?: string,
-    @Query('page') page?: string,
-    @Query('limit') limit?: string,
+    @Query(
+      "instrumentStatus",
+      new ParseEnumPipe(InstrumentStatus, { optional: true })
+    )
+    instrumentStatus?: InstrumentStatus,
+    @Query(
+      "instrumentExchange",
+      new ParseEnumPipe(InstrumentExchange, { optional: true })
+    )
+    instrumentExchange?: InstrumentExchange,
+    @Query(
+      "page",
+      new ParseIntPipe({ optional: true }),
+      new DefaultValuePipe(1)
+    )
+    page?: number,
+    @Query(
+      "limit",
+      new ParseIntPipe({ optional: true }),
+      new DefaultValuePipe(10)
+    )
+    limit?: number
   ): Promise<PaginatedResponse<Currency>> {
     const params: {
       instrumentStatus?: InstrumentStatus;
       instrumentExchange?: InstrumentExchange;
       page?: number;
       limit?: number;
-    } = {};
+    } = { page, limit };
 
     if (instrumentStatus) {
-      params.instrumentStatus = instrumentStatus as InstrumentStatus;
+      params.instrumentStatus = instrumentStatus;
     }
 
     if (instrumentExchange) {
-      params.instrumentExchange = instrumentExchange as InstrumentExchange;
-    }
-
-    if (page) {
-      const pageNumber = parseInt(page, 10);
-      if (!isNaN(pageNumber) && pageNumber > 0) {
-        params.page = pageNumber;
-      }
-    }
-
-    if (limit) {
-      const limitNumber = parseInt(limit, 10);
-      if (!isNaN(limitNumber) && limitNumber > 0) {
-        params.limit = limitNumber;
-      }
+      params.instrumentExchange = instrumentExchange;
     }
 
     return this.tInvestService.getCurrencies(
-      Object.keys(params).length > 0 ? params : undefined,
+      Object.keys(params).length > 0 ? params : undefined
     );
   }
 
@@ -86,44 +93,48 @@ export class TInvestController {
    * @param limit Количество элементов на странице
    * @returns Список облигаций
    */
-  @Get('bonds')
+  @Get("bonds")
   async getBonds(
-    @Query('instrumentStatus') instrumentStatus?: string,
-    @Query('instrumentExchange') instrumentExchange?: string,
-    @Query('page') page?: string,
-    @Query('limit') limit?: string,
+    @Query(
+      "instrumentStatus",
+      new ParseEnumPipe(InstrumentStatus, { optional: true })
+    )
+    instrumentStatus?: InstrumentStatus,
+    @Query(
+      "instrumentExchange",
+      new ParseEnumPipe(InstrumentExchange, { optional: true })
+    )
+    instrumentExchange?: InstrumentExchange,
+    @Query(
+      "page",
+      new ParseIntPipe({ optional: true }),
+      new DefaultValuePipe(1)
+    )
+    page?: number,
+    @Query(
+      "limit",
+      new ParseIntPipe({ optional: true }),
+      new DefaultValuePipe(50)
+    )
+    limit?: number
   ): Promise<PaginatedResponse<Bond>> {
     const params: {
       instrumentStatus?: InstrumentStatus;
       instrumentExchange?: InstrumentExchange;
       page?: number;
       limit?: number;
-    } = {};
+    } = { page, limit };
 
     if (instrumentStatus) {
-      params.instrumentStatus = instrumentStatus as InstrumentStatus;
+      params.instrumentStatus = instrumentStatus;
     }
 
     if (instrumentExchange) {
-      params.instrumentExchange = instrumentExchange as InstrumentExchange;
-    }
-
-    if (page) {
-      const pageNumber = parseInt(page, 10);
-      if (!isNaN(pageNumber) && pageNumber > 0) {
-        params.page = pageNumber;
-      }
-    }
-
-    if (limit) {
-      const limitNumber = parseInt(limit, 10);
-      if (!isNaN(limitNumber) && limitNumber > 0) {
-        params.limit = limitNumber;
-      }
+      params.instrumentExchange = instrumentExchange;
     }
 
     return this.tInvestService.getBonds(
-      Object.keys(params).length > 0 ? params : undefined,
+      Object.keys(params).length > 0 ? params : undefined
     );
   }
 
@@ -134,14 +145,19 @@ export class TInvestController {
    * @param classCode Класс инструмента (обязателен при idType=TICKER)
    * @returns Информация об облигации
    */
-  @Get('bonds/:id')
+  @Get("bonds/:id")
   async getBondBy(
-    @Param('id') id: string,
-    @Query('idType') idType?: string,
-    @Query('classCode') classCode?: string,
+    @Param("id") id: string,
+    @Query(
+      "idType",
+      new ParseEnumPipe(InstrumentIdType),
+      new DefaultValuePipe(InstrumentIdType.UID),
+    )
+    idType: InstrumentIdType,
+    @Query("classCode") classCode?: string
   ): Promise<Bond> {
     const requestParams = {
-      idType: (idType as InstrumentIdType) || InstrumentIdType.UID,
+      idType,
       id,
       ...(classCode && { classCode }),
     };
@@ -156,14 +172,19 @@ export class TInvestController {
    * @param classCode Класс инструмента (обязателен при idType=TICKER)
    * @returns Информация о валюте
    */
-  @Get('currencies/:id')
+  @Get("currencies/:id")
   async getCurrencyBy(
-    @Param('id') id: string,
-    @Query('idType') idType?: string,
-    @Query('classCode') classCode?: string,
+    @Param("id") id: string,
+    @Query(
+      "idType",
+      new ParseEnumPipe(InstrumentIdType),
+      new DefaultValuePipe(InstrumentIdType.UID),
+    )
+    idType: InstrumentIdType,
+    @Query("classCode") classCode?: string
   ): Promise<Currency> {
     const requestParams = {
-      idType: (idType as InstrumentIdType) || InstrumentIdType.UID,
+      idType,
       id,
       ...(classCode && { classCode }),
     };
@@ -177,27 +198,27 @@ export class TInvestController {
    * @param instrumentKind Тип инструмента (опционально)
    * @returns Список найденных инструментов
    */
-  @Get('instruments/search')
+  @Get("instruments/search")
   async findInstrument(
-    @Query('query') query: string,
-    @Query('instrumentKind') instrumentKind?: string,
+    @Query("query", new ParseStringPipe())
+    query: string,
+    @Query(
+      "instrumentKind",
+      new ParseEnumPipe(InstrumentKind, { optional: true })
+    )
+    instrumentKind?: InstrumentKind
   ): Promise<FindInstrumentResponse> {
-    if (!query || query.trim() === '') {
-      throw new BadRequestException('Query parameter is required');
-    }
-
     const requestParams: {
       query: string;
       instrumentKind?: InstrumentKind;
     } = {
-      query: query.trim(),
+      query,
     };
 
     if (instrumentKind) {
-      requestParams.instrumentKind = instrumentKind as InstrumentKind;
+      requestParams.instrumentKind = instrumentKind;
     }
 
     return this.tInvestService.findInstrument(requestParams);
   }
 }
-
