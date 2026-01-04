@@ -1,6 +1,7 @@
 import { Module, Global } from "@nestjs/common";
 import { ConfigModule } from "@nestjs/config";
 import { UserModule } from "./user/user.module";
+import { FavoriteModule } from "./favorite/favorite.module";
 import { TInvestModule } from "./t-invest/t-invest.module";
 import { PrismaService } from "./common/prisma.service";
 
@@ -12,6 +13,7 @@ import { PrismaService } from "./common/prisma.service";
       envFilePath: ".env", // путь к файлу .env
     }),
     UserModule,
+    FavoriteModule,
     TInvestModule,
   ],
   providers: [PrismaService],

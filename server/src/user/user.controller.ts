@@ -9,11 +9,10 @@ import {
   Query,
   UseFilters,
   ParseIntPipe,
-  BadRequestException,
   DefaultValuePipe,
 } from '@nestjs/common';
 import { UserService } from './user.service';
-import { User, Prisma, Favorite } from '../generated/prisma/client.js';
+import { User, Prisma } from '../generated/prisma/client.js';
 import { AllExceptionsFilter } from '../common/all-exception.filter';
 
 @Controller('users')
@@ -87,57 +86,6 @@ export class UserController {
   @Delete(':id')
   async deleteUser(@Param('id', ParseIntPipe) id: number): Promise<User> {
     return this.userService.deleteUser({ id });
-  }
-
-  /**
-   * Добавить инструмент в избранное пользователя
-   * @param id ID пользователя
-   * @param body Данные избранного (instrumentId, instrumentType, notes?)
-   * @returns Созданная запись избранного
-   */
-  @Post(':id/favorites')
-  async addFavorite(
-    @Param('id', ParseIntPipe) id: number,
-    @Body()
-    body: {
-      instrumentId: string;
-      instrumentType: string;
-      notes?: string;
-    },
-  ): Promise<Favorite> {
-    if (!body.instrumentId || !body.instrumentType) {
-      throw new BadRequestException(
-        'instrumentId and instrumentType are required',
-      );
-    }
-
-    return this.userService.addFavorite(id, body);
-  }
-
-  /**
-   * Получить все избранное пользователя
-   * @param id ID пользователя
-   * @returns Список избранных инструментов
-   */
-  @Get(':id/favorites')
-  async getFavorites(
-    @Param('id', ParseIntPipe) id: number,
-  ): Promise<Favorite[]> {
-    return this.userService.getFavorites(id);
-  }
-
-  /**
-   * Удалить инструмент из избранного
-   * @param id ID пользователя
-   * @param instrumentId ID инструмента
-   * @returns Удаленная запись избранного
-   */
-  @Delete(':id/favorites/:instrumentId')
-  async removeFavorite(
-    @Param('id', ParseIntPipe) id: number,
-    @Param('instrumentId') instrumentId: string,
-  ): Promise<Favorite> {
-    return this.userService.removeFavorite(id, instrumentId);
   }
 }
 

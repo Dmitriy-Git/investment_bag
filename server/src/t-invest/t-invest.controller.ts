@@ -150,8 +150,8 @@ export class TInvestController {
     @Param("id") id: string,
     @Query(
       "idType",
-      new ParseEnumPipe(InstrumentIdType),
       new DefaultValuePipe(InstrumentIdType.UID),
+      new ParseEnumPipe(InstrumentIdType),
     )
     idType: InstrumentIdType,
     @Query("classCode") classCode?: string
@@ -177,8 +177,8 @@ export class TInvestController {
     @Param("id") id: string,
     @Query(
       "idType",
-      new ParseEnumPipe(InstrumentIdType),
       new DefaultValuePipe(InstrumentIdType.UID),
+      new ParseEnumPipe(InstrumentIdType),
     )
     idType: InstrumentIdType,
     @Query("classCode") classCode?: string
