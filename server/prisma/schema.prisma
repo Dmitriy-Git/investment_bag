@@ -14,22 +14,22 @@ datasource db {
 }
 
 model User {
-  id        Int      @id @default(autoincrement())
-  email     String   @unique
+  id        Int        @id @default(autoincrement())
+  email     String     @unique
   name      String?
-  createdAt DateTime @default(now())
+  createdAt DateTime   @default(now())
   favorites Favorite[]
 }
 
 model Favorite {
-  id           Int      @id @default(autoincrement())
-  userId       Int      // ← Внешний ключ (foreign key)
-  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  instrumentId String   // UID или FIGI инструмента
+  id             Int      @id @default(autoincrement())
+  userId         Int // ← Внешний ключ (foreign key)
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  instrumentId   String // UID или FIGI инструмента
   instrumentType String // BOND, CURRENCY, SHARE, ETF и т.д.
-  notes        String?
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  notes          String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 
   @@unique([userId, instrumentId]) // Один пользователь не может добавить один инструмент дважды
   @@index([userId])

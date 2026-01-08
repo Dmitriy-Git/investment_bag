@@ -17,12 +17,18 @@ import {
   GetBondByResponse,
 } from "./interfaces/bonds.interface";
 import {
+  Share,
+  GetSharesRequest,
+  GetSharesResponse,
+  GetShareByRequest,
+  GetShareByResponse,
+} from "./interfaces/shares.interface";
+import {
   InstrumentIdType,
   InstrumentStatus,
   InstrumentExchange,
 } from "./interfaces/common.interface";
 import {
-  Instrument,
   FindInstrumentRequest,
   FindInstrumentResponse,
 } from "./interfaces/instruments.interface";
@@ -33,11 +39,34 @@ import { PaginatedResponse } from "../common/pagination.interface";
  */
 @Injectable()
 export class TInvestService {
-
   constructor(
     private readonly httpService: HttpService,
-    private readonly config: TInvestConfig,
+    private readonly config: TInvestConfig
   ) {}
+
+  static preparedInstrumentsResponse<T>(
+    data: T[],
+    page: number,
+    limit: number
+  ): PaginatedResponse<T> {
+    const allInstruments = data;
+    const totalItems = allInstruments.length;
+    const totalPages = Math.ceil(totalItems / limit);
+
+    // Вычисляем индексы для текущей страницы
+    const startIndex = (page - 1) * limit;
+    const endIndex = startIndex + limit;
+
+    // Получаем элементы для текущей страницы
+    const paginatedInstruments = allInstruments.slice(startIndex, endIndex);
+
+    return {
+      results: paginatedInstruments,
+      count: totalItems,
+      next: page < totalPages ? page + 1 : null,
+      prev: page > 1 ? page - 1 : null,
+    };
+  }
 
   /**
    * Получить список валют
@@ -68,23 +97,11 @@ export class TInvestService {
       })
     );
 
-    const allInstruments = response.data.instruments;
-    const totalItems = allInstruments.length;
-    const totalPages = Math.ceil(totalItems / limit);
-
-    // Вычисляем индексы для текущей страницы
-    const startIndex = (page - 1) * limit;
-    const endIndex = startIndex + limit;
-
-    // Получаем элементы для текущей страницы
-    const paginatedInstruments = allInstruments.slice(startIndex, endIndex);
-
-    return {
-      results: paginatedInstruments,
-      count: totalItems,
-      next: page < totalPages ? page + 1 : null,
-      prev: page > 1 ? page - 1 : null,
-    };
+    return TInvestService.preparedInstrumentsResponse(
+      response.data.instruments,
+      page,
+      limit
+    );
   }
 
   /**
@@ -93,9 +110,7 @@ export class TInvestService {
    * @returns Список облигаций
    * @throws HttpException при ошибке запроса к API
    */
-  async getBonds(
-    params?: GetBondsRequest
-  ): Promise<PaginatedResponse<Bond>> {
+  async getBonds(params?: GetBondsRequest): Promise<PaginatedResponse<Bond>> {
     const page = params?.page ?? 1;
     const limit = params?.limit ?? 100;
 
@@ -116,23 +131,47 @@ export class TInvestService {
       })
     );
 
-    const allInstruments = response.data.instruments;
-    const totalItems = allInstruments.length;
-    const totalPages = Math.ceil(totalItems / limit);
+    return TInvestService.preparedInstrumentsResponse(
+      response.data.instruments,
+      page,
+      limit
+    );
+  }
 
-    // Вычисляем индексы для текущей страницы
-    const startIndex = (page - 1) * limit;
-    const endIndex = startIndex + limit;
+  /**
+   * Получить список акций
+   * @param params Параметры запроса (опционально)
+   * @returns Список акций
+   * @throws HttpException при ошибке запроса к API
+   */
+  async getShares(
+    params?: GetSharesRequest
+  ): Promise<PaginatedResponse<Share>> {
+    const page = params?.page ?? 1;
+    const limit = params?.limit ?? 50;
 
-    // Получаем элементы для текущей страницы
-    const paginatedInstruments = allInstruments.slice(startIndex, endIndex);
+    const url = `${this.config.getApiUrl()}.InstrumentsService/Shares`;
+    const headers = this.config.getHeaders();
 
-    return {
-      results: paginatedInstruments,
-      count: totalItems,
-      next: page < totalPages ? page + 1 : null,
-      prev: page > 1 ? page - 1 : null,
+    const requestBody: GetSharesRequest = {
+      instrumentStatus:
+        params?.instrumentStatus || InstrumentStatus.UNSPECIFIED,
+      instrumentExchange:
+        params?.instrumentExchange || InstrumentExchange.UNSPECIFIED,
     };
+
+    // Получаем все акции от API
+    const response = await firstValueFrom(
+      this.httpService.post<GetSharesResponse>(url, requestBody, {
+        headers,
+      })
+    );
+
+    return TInvestService.preparedInstrumentsResponse(
+      response.data.instruments,
+      page,
+      limit
+    );
   }
 
   /**
@@ -186,6 +225,31 @@ export class TInvestService {
   }
 
   /**
+   * Получить информацию об одной акции по идентификатору
+   * @param params Параметры запроса
+   * @returns Информация об акции
+   * @throws HttpException при ошибке запроса к API
+   */
+  async getShareBy(params: GetShareByRequest): Promise<Share> {
+    const url = `${this.config.getApiUrl()}.InstrumentsService/ShareBy`;
+    const headers = this.config.getHeaders();
+
+    const requestBody: GetShareByRequest = {
+      idType: params.idType || InstrumentIdType.UID,
+      id: params.id,
+      ...(params.classCode && { classCode: params.classCode }),
+    };
+
+    const response = await firstValueFrom(
+      this.httpService.post<GetShareByResponse>(url, requestBody, {
+        headers,
+      })
+    );
+
+    return response.data.instrument;
+  }
+
+  /**
    * Поиск инструментов по запросу
    * @param params Параметры запроса поиска
    * @returns Список найденных инструментов
@@ -208,6 +272,6 @@ export class TInvestService {
       })
     );
 
-    return { instruments: response.data.instruments }
+    return { instruments: response.data.instruments };
   }
 }

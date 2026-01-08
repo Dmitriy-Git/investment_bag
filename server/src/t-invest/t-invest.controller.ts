@@ -11,6 +11,7 @@ import {
 import { TInvestService } from "./t-invest.service";
 import { Currency } from "./interfaces/currencies.interface";
 import { Bond } from "./interfaces/bonds.interface";
+import { Share } from "./interfaces/shares.interface";
 import {
   InstrumentIdType,
   InstrumentStatus,
@@ -139,6 +140,59 @@ export class TInvestController {
   }
 
   /**
+   * Получить список акций
+   * @param instrumentStatus Статус запрашиваемых инструментов
+   * @param instrumentExchange Площадка торговли
+   * @param page Номер страницы (начинается с 1)
+   * @param limit Количество элементов на странице
+   * @returns Список акций
+   */
+  @Get("shares")
+  async getShares(
+    @Query(
+      "instrumentStatus",
+      new ParseEnumPipe(InstrumentStatus, { optional: true })
+    )
+    instrumentStatus?: InstrumentStatus,
+    @Query(
+      "instrumentExchange",
+      new ParseEnumPipe(InstrumentExchange, { optional: true })
+    )
+    instrumentExchange?: InstrumentExchange,
+    @Query(
+      "page",
+      new ParseIntPipe({ optional: true }),
+      new DefaultValuePipe(1)
+    )
+    page?: number,
+    @Query(
+      "limit",
+      new ParseIntPipe({ optional: true }),
+      new DefaultValuePipe(50)
+    )
+    limit?: number
+  ): Promise<PaginatedResponse<Share>> {
+    const params: {
+      instrumentStatus?: InstrumentStatus;
+      instrumentExchange?: InstrumentExchange;
+      page?: number;
+      limit?: number;
+    } = { page, limit };
+
+    if (instrumentStatus) {
+      params.instrumentStatus = instrumentStatus;
+    }
+
+    if (instrumentExchange) {
+      params.instrumentExchange = instrumentExchange;
+    }
+
+    return this.tInvestService.getShares(
+      Object.keys(params).length > 0 ? params : undefined
+    );
+  }
+
+  /**
    * Получить информацию об одной облигации по идентификатору
    * @param id Идентификатор облигации (FIGI, Ticker, UID или Position UID)
    * @param idType Тип идентификатора (FIGI, TICKER, UID, POSITION_UID)
@@ -190,6 +244,33 @@ export class TInvestController {
     };
 
     return this.tInvestService.getCurrencyBy(requestParams);
+  }
+
+  /**
+   * Получить информацию об одной акции по идентификатору
+   * @param id Идентификатор акции (FIGI, Ticker, UID или Position UID)
+   * @param idType Тип идентификатора (FIGI, TICKER, UID, POSITION_UID)
+   * @param classCode Класс инструмента (обязателен при idType=TICKER)
+   * @returns Информация об акции
+   */
+  @Get("shares/:id")
+  async getShareBy(
+    @Param("id") id: string,
+    @Query(
+      "idType",
+      new DefaultValuePipe(InstrumentIdType.UID),
+      new ParseEnumPipe(InstrumentIdType),
+    )
+    idType: InstrumentIdType,
+    @Query("classCode") classCode?: string
+  ): Promise<Share> {
+    const requestParams = {
+      idType,
+      id,
+      ...(classCode && { classCode }),
+    };
+
+    return this.tInvestService.getShareBy(requestParams);
   }
 
   /**

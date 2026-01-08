@@ -9,7 +9,7 @@ dist/
 .env
 
 # Prisma generated files
-/src/generated/
+/src/generated/prisma
 
 # OS
 .DS_Store
