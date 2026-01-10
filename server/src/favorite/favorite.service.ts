@@ -2,6 +2,7 @@ import { Injectable, NotFoundException, ConflictException } from '@nestjs/common
 import { Favorite, Prisma } from '../generated/prisma/client.js';
 import { PrismaService } from '../common/prisma.service';
 import { UserService } from '../user/user.service';
+import { CreateFavoriteDto } from './dto/create-favorite.dto';
 
 @Injectable()
 export class FavoriteService {
@@ -18,11 +19,7 @@ export class FavoriteService {
    */
   async addFavorite(
     userId: number,
-    data: {
-      instrumentId: string;
-      instrumentType: string;
-      notes?: string;
-    },
+    data: CreateFavoriteDto,
   ): Promise<Favorite> {
     // Проверяем существование пользователя
     const user = await this.userService.user({ id: userId });

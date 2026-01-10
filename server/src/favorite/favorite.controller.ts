@@ -6,12 +6,12 @@ import {
   Param,
   Body,
   ParseIntPipe,
-  BadRequestException,
   UseFilters,
 } from '@nestjs/common';
 import { FavoriteService } from './favorite.service';
 import { Favorite } from '../generated/prisma/client.js';
 import { AllExceptionsFilter } from '../common/all-exception.filter';
+import { CreateFavoriteDto } from './dto/create-favorite.dto';
 
 @Controller('users/:userId/favorites')
 @UseFilters(AllExceptionsFilter)
@@ -27,19 +27,8 @@ export class FavoriteController {
   @Post()
   async addFavorite(
     @Param('userId', ParseIntPipe) userId: number,
-    @Body()
-    body: {
-      instrumentId: string;
-      instrumentType: string;
-      notes?: string;
-    },
+    @Body() body: CreateFavoriteDto,
   ): Promise<Favorite> {
-    if (!body.instrumentId || !body.instrumentType) {
-      throw new BadRequestException(
-        'instrumentId and instrumentType are required',
-      );
-    }
-
     return this.favoriteService.addFavorite(userId, body);
   }
 

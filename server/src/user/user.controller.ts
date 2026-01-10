@@ -14,16 +14,21 @@ import {
 import { UserService } from './user.service';
 import { User, Prisma } from '../generated/prisma/client.js';
 import { AllExceptionsFilter } from '../common/all-exception.filter';
+import { CreateUserDto } from './dto/create-user.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
 
 @Controller('users')
 @UseFilters(AllExceptionsFilter)
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
+  /**
+   * Создать нового пользователя
+   * @param userData Данные пользователя (email обязательный, name опциональный)
+   * @returns Созданный пользователь
+   */
   @Post()
-  async createUser(
-    @Body() userData: { name?: string; email: string },
-  ): Promise<User> {
+  async createUser(@Body() userData: CreateUserDto): Promise<User> {
     return this.userService.createUser(userData);
   }
 
@@ -65,6 +70,11 @@ export class UserController {
     return this.userService.users(params);
   }
 
+  /**
+   * Получить пользователя по ID
+   * @param id ID пользователя
+   * @returns Пользователь или null
+   */
   @Get(':id')
   async getUser(
     @Param('id', ParseIntPipe) id: number,
@@ -72,10 +82,16 @@ export class UserController {
     return this.userService.user({ id });
   }
 
+  /**
+   * Обновить пользователя
+   * @param id ID пользователя
+   * @param userData Данные для обновления
+   * @returns Обновленный пользователь
+   */
   @Put(':id')
   async updateUser(
     @Param('id', ParseIntPipe) id: number,
-    @Body() userData: Prisma.UserUpdateInput,
+    @Body() userData: UpdateUserDto,
   ): Promise<User> {
     return this.userService.updateUser({
       where: { id },
@@ -83,6 +99,11 @@ export class UserController {
     });
   }
 
+  /**
+   * Удалить пользователя
+   * @param id ID пользователя
+   * @returns Удаленный пользователь
+   */
   @Delete(':id')
   async deleteUser(@Param('id', ParseIntPipe) id: number): Promise<User> {
     return this.userService.deleteUser({ id });

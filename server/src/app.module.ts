@@ -3,6 +3,7 @@ import { ConfigModule } from "@nestjs/config";
 import { UserModule } from "./user/user.module";
 import { FavoriteModule } from "./favorite/favorite.module";
 import { TInvestModule } from "./t-invest/t-invest.module";
+import { PortfolioModule } from "./portfolio/portfolio.module";
 import { PrismaService } from "./common/prisma.service";
 
 @Global()
@@ -15,6 +16,7 @@ import { PrismaService } from "./common/prisma.service";
     UserModule,
     FavoriteModule,
     TInvestModule,
+    PortfolioModule,
   ],
   providers: [PrismaService],
   exports: [PrismaService],
