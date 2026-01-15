@@ -1,0 +1,27 @@
+<nz-layout class="app-layout">
+  <nz-header class="app-header">
+    <app-header 
+      [collapsed]="isCollapsed()" 
+      (toggleCollapse)="isCollapsed.set(!isCollapsed())"
+      [theme]="sidebarTheme()"
+      (themeChange)="sidebarTheme.set($event)" />
+  </nz-header>
+  <nz-layout>
+    <nz-sider
+      class="app-sider"
+      [nzWidth]="250"
+      [nzCollapsedWidth]="80"
+      [nzCollapsible]="true"
+      [(nzCollapsed)]="isCollapsed"
+      [nzTheme]="sidebarTheme()"
+      [nzTrigger]="null">
+      <app-sidebar 
+        [collapsed]="isCollapsed()" 
+        [theme]="sidebarTheme()" />
+    </nz-sider>
+    <nz-content class="app-content">
+      <router-outlet />
+    </nz-content>
+  </nz-layout>
+</nz-layout>
+

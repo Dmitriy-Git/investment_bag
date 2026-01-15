@@ -1,0 +1,25 @@
+<div class="header-container">
+  <div class="header-left">
+    <button 
+      nz-button 
+      nzType="text" 
+      nzSize="large"
+      (click)="onToggleCollapse()"
+      class="menu-trigger">
+      <span nz-icon [nzType]="collapsed() ? menuUnfoldIcon : menuFoldIcon"></span>
+    </button>
+    <h1 class="app-title">Investment Bag</h1>
+  </div>
+  <div class="header-right">
+    <button nz-button nzType="text" nz-dropdown [nzDropdownMenu]="menu">
+      <span>Тема: {{ theme() === 'dark' ? 'Темная' : 'Светлая' }}</span>
+    </button>
+    <nz-dropdown-menu #menu="nzDropdownMenu">
+      <ul nz-menu nzSelectable>
+        <li nz-menu-item (click)="onThemeChange('light')">Светлая</li>
+        <li nz-menu-item (click)="onThemeChange('dark')">Темная</li>
+      </ul>
+    </nz-dropdown-menu>
+  </div>
+</div>
+

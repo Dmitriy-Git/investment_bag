@@ -1,0 +1,18 @@
+<ul 
+  nz-menu 
+  [nzMode]="collapsed() ? 'vertical' : 'inline'"
+  [nzTheme]="theme()"
+  [nzInlineCollapsed]="collapsed()"
+  class="sidebar-menu">
+  @for (item of menuItems; track item.route) {
+    <li nz-menu-item [class.ant-menu-item-selected]="isRouteActive(item.route, item.exact)">
+      <a [routerLink]="item.route">
+        <nz-icon [nzType]="item.icon" />
+        @if (!collapsed()) {
+          <span class="menu-title">{{ item.title }}</span>
+        }
+      </a>
+    </li>
+  }
+</ul>
+

@@ -1,0 +1,29 @@
+.app-layout {
+  min-height: 100vh;
+}
+
+.app-header {
+  padding: 0;
+  background: #fff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+
+.app-sider {
+  overflow: auto;
+  height: calc(100vh - 64px);
+  position: sticky;
+  top: 64px;
+  left: 0;
+}
+
+.app-content {
+  margin: 24px;
+  padding: 24px;
+  background: #fff;
+  min-height: calc(100vh - 112px);
+  border-radius: 8px;
+}
+
