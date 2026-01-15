@@ -1,2 +1,40 @@
-<h1>Портфель</h1>
+<section class="page" [attr.aria-busy]="isLoading() ? 'true' : 'false'">
+  <header class="page__header">
+    <h1 class="page__title">Портфель</h1>
+  </header>
+
+  @if (isLoading()) {
+    <p class="status">Загрузка портфеля…</p>
+  } @else if (errorMessage(); as message) {
+    <p class="status status--error" role="alert">{{ message }}</p>
+  } @else if (!hasPositions()) {
+    <p class="status">Пока нет позиций в портфеле.</p>
+  } @else {
+    <div class="table-wrap">
+      <table class="table">
+        <caption class="sr-only">Список позиций в портфеле</caption>
+        <thead>
+          <tr>
+            <th scope="col">Инструмент</th>
+            <th scope="col">Тип</th>
+            <th scope="col">Кол-во</th>
+            <th scope="col">Цена покупки</th>
+            <th scope="col">Дата покупки</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (p of portfolioValue(); track p.id) {
+            <tr>
+              <td>{{ p.instrumentId }}</td>
+              <td>{{ p.instrumentType }}</td>
+              <td>{{ p.quantity }}</td>
+              <td>{{ p.purchasePrice }}</td>
+              <td>{{ p.purchaseDate }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</section>
 
