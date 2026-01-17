@@ -10,31 +10,7 @@
   } @else if (!hasPositions()) {
     <p class="status">Пока нет позиций в портфеле.</p>
   } @else {
-    <div class="table-wrap">
-      <table class="table">
-        <caption class="sr-only">Список позиций в портфеле</caption>
-        <thead>
-          <tr>
-            <th scope="col">Инструмент</th>
-            <th scope="col">Тип</th>
-            <th scope="col">Кол-во</th>
-            <th scope="col">Цена покупки</th>
-            <th scope="col">Дата покупки</th>
-          </tr>
-        </thead>
-        <tbody>
-          @for (p of portfolioValue(); track p.id) {
-            <tr>
-              <td>{{ p.instrumentId }}</td>
-              <td>{{ p.instrumentType }}</td>
-              <td>{{ p.quantity }}</td>
-              <td>{{ p.purchasePrice }}</td>
-              <td>{{ p.purchaseDate }}</td>
-            </tr>
-          }
-        </tbody>
-      </table>
-    </div>
+    <portfolio-allocation-chart [portfolioValue]="portfolioValue()" />
   }
 </section>
 

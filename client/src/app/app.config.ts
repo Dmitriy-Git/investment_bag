@@ -4,6 +4,15 @@ import { routes } from './app.routes';
 import { provideClientHydration, withEventReplay } from '@angular/platform-browser';
 import { provideHttpClient, withFetch, withInterceptors } from '@angular/common/http';
 import { provideNzIcons } from 'ng-zorro-antd/icon';
+import { provideEchartsCore } from 'ngx-echarts';
+import * as echarts from 'echarts/core';
+import { PieChart } from 'echarts/charts';
+import { TitleComponent, TooltipComponent, LegendComponent } from 'echarts/components';
+import { CanvasRenderer } from 'echarts/renderers';
+
+// Register the required components
+echarts.use([PieChart, TitleComponent, TooltipComponent, LegendComponent, CanvasRenderer]);
+
 import {
   MenuFoldOutline,
   MenuUnfoldOutline,
@@ -32,5 +41,6 @@ export const appConfig: ApplicationConfig = {
     provideHttpClient(withFetch(), withInterceptors([baseUrlInterceptor, errorInterceptor])),
     provideClientHydration(withEventReplay()),
     provideNzIcons(icons),
+    provideEchartsCore({ echarts }),
   ],
 };

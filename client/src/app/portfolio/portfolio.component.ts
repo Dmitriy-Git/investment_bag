@@ -1,12 +1,13 @@
 import { ChangeDetectionStrategy, Component, computed, inject, resource, signal } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
-import { PortfolioService } from '../services/portfolio.service';
+import { PortfolioService } from './services/portfolio.service';
 import { USER_ID } from '../constants/user.constants';
 import type { PortfolioPosition } from '../models/portfolio.model';
+import { AllocationChartComponent } from './components';
 
 @Component({
   selector: 'app-portfolio',
-  imports: [],
+  imports: [AllocationChartComponent],
   templateUrl: './portfolio.component.html',
   styleUrl: './portfolio.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

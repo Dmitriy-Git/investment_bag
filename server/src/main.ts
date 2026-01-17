@@ -7,6 +7,11 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.use(logger);
 
+  app.enableCors({
+    origin: '*',
+    credentials: true,
+  });
+
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true, // Удаляет свойства, которых нет в DTO

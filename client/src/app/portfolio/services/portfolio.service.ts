@@ -5,7 +5,7 @@ import {
   PortfolioPosition,
   CreatePortfolioPositionDto,
   UpdatePortfolioPositionDto,
-} from '../models/portfolio.model';
+} from '../../models/portfolio.model';
 
 @Injectable({
   providedIn: 'root',
