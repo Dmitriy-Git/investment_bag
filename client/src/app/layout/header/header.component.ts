@@ -1,13 +1,12 @@
 import { Component, input, output } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { NzIconModule } from 'ng-zorro-antd/icon';
-import { NzButtonModule } from 'ng-zorro-antd/button';
-import { NzDropdownModule } from 'ng-zorro-antd/dropdown';
-import { NzMenuModule } from 'ng-zorro-antd/menu';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { MatToolbarModule } from '@angular/material/toolbar';
 
 @Component({
   selector: 'app-header',
-  imports: [CommonModule, NzIconModule, NzButtonModule, NzDropdownModule, NzMenuModule],
+  imports: [CommonModule, MatButtonModule, MatIconModule, MatToolbarModule],
   templateUrl: './header.component.html',
   styleUrl: './header.component.scss'
 })
@@ -16,17 +15,9 @@ export class HeaderComponent {
   theme = input.required<'light' | 'dark'>();
   
   toggleCollapse = output<void>();
-  themeChange = output<'light' | 'dark'>();
-
-  menuFoldIcon = 'menu-fold';
-  menuUnfoldIcon = 'menu-unfold';
 
   onToggleCollapse(): void {
     this.toggleCollapse.emit();
-  }
-
-  onThemeChange(newTheme: 'light' | 'dark'): void {
-    this.themeChange.emit(newTheme);
   }
 }
 

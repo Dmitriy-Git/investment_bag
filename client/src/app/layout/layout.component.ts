@@ -1,17 +1,24 @@
-import { Component, signal } from '@angular/core';
+import { Component, signal, effect } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
-import { NzLayoutModule } from 'ng-zorro-antd/layout';
+import { MatSidenavModule } from '@angular/material/sidenav';
 import { HeaderComponent } from './header/header.component';
 import { SidebarComponent } from './sidebar/sidebar.component';
 
 @Component({
   selector: 'app-layout',
-  imports: [NzLayoutModule, RouterOutlet, HeaderComponent, SidebarComponent],
+  imports: [MatSidenavModule, RouterOutlet, HeaderComponent, SidebarComponent],
   templateUrl: './layout.component.html',
   styleUrl: './layout.component.scss'
 })
 export class LayoutComponent {
   protected readonly isCollapsed = signal(false);
-  protected readonly sidebarTheme = signal<'light' | 'dark'>('dark');
+  protected readonly sidebarTheme = signal<'light' | 'dark'>('light');
+
+  constructor() {
+    effect(() => {
+      const theme = this.sidebarTheme();
+      document.documentElement.setAttribute('data-theme', theme);
+    });
+  }
 }
 

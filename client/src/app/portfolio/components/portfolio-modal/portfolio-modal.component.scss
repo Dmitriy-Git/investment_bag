@@ -1,0 +1,16 @@
+.form-field {
+  width: 100%;
+  margin-bottom: 1rem;
+}
+
+.error-message {
+  color: var(--mat-error-text-color);
+  margin-top: 0.5rem;
+  margin-bottom: 0;
+}
+
+mat-dialog-content {
+  min-width: 400px;
+  max-width: 600px;
+}
+

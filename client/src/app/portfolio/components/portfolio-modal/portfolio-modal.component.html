@@ -1,0 +1,79 @@
+<h2 mat-dialog-title>Добавить позицию в портфель</h2>
+
+<mat-dialog-content>
+  <form [formGroup]="form" (ngSubmit)="onSubmit()">
+    <mat-form-field appearance="outline" class="form-field">
+      <mat-label>ID инструмента</mat-label>
+      <input matInput formControlName="instrumentId" type="text" required />
+      @if (form.get('instrumentId')?.hasError('required') && form.get('instrumentId')?.touched) {
+        <mat-error>ID инструмента обязателен</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="form-field">
+      <mat-label>Тип инструмента</mat-label>
+      <mat-select formControlName="instrumentType" required>
+        <mat-option value="stock">Акция</mat-option>
+        <mat-option value="bond">Облигация</mat-option>
+        <mat-option value="etf">ETF</mat-option>
+        <mat-option value="currency">Валюта</mat-option>
+      </mat-select>
+      @if (form.get('instrumentType')?.hasError('required') && form.get('instrumentType')?.touched) {
+        <mat-error>Тип инструмента обязателен</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="form-field">
+      <mat-label>Количество</mat-label>
+      <input matInput formControlName="quantity" type="number" min="0" step="0.01" required />
+      @if (form.get('quantity')?.hasError('required') && form.get('quantity')?.touched) {
+        <mat-error>Количество обязательно</mat-error>
+      }
+      @if (form.get('quantity')?.hasError('min') && form.get('quantity')?.touched) {
+        <mat-error>Количество должно быть больше нуля</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="form-field">
+      <mat-label>Цена покупки</mat-label>
+      <input matInput formControlName="purchasePrice" type="number" min="0" step="0.01" required />
+      @if (form.get('purchasePrice')?.hasError('required') && form.get('purchasePrice')?.touched) {
+        <mat-error>Цена покупки обязательна</mat-error>
+      }
+      @if (form.get('purchasePrice')?.hasError('min') && form.get('purchasePrice')?.touched) {
+        <mat-error>Цена должна быть больше нуля</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="form-field">
+      <mat-label>Дата покупки</mat-label>
+      <input matInput [matDatepicker]="picker" formControlName="purchaseDate" required />
+      <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+      <mat-datepicker #picker></mat-datepicker>
+      @if (form.get('purchaseDate')?.hasError('required') && form.get('purchaseDate')?.touched) {
+        <mat-error>Дата покупки обязательна</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="form-field">
+      <mat-label>Примечания</mat-label>
+      <textarea matInput formControlName="notes" rows="3"></textarea>
+    </mat-form-field>
+
+    @if (errorMessage()) {
+      <p class="error-message" role="alert">{{ errorMessage() }}</p>
+    }
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button type="button" mat-dialog-close>Отмена</button>
+  <button mat-raised-button type="button" color="primary" [disabled]="form.invalid || isSubmitting()" (click)="onSubmit()">
+    @if (isSubmitting()) {
+      Добавление...
+    } @else {
+      Добавить
+    }
+  </button>
+</mat-dialog-actions>
+

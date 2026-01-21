@@ -1,10 +1,9 @@
-import { Component, input, inject } from '@angular/core';
+import { Component, input, output } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule, Router, NavigationEnd } from '@angular/router';
-import { NzMenuModule } from 'ng-zorro-antd/menu';
-import { NzIconModule } from 'ng-zorro-antd/icon';
-import { toSignal } from '@angular/core/rxjs-interop';
-import { filter, map, startWith } from 'rxjs';
+import { RouterModule } from '@angular/router';
+import { MatIconModule } from '@angular/material/icon';
+import { MatListModule } from '@angular/material/list';
+import { MatButtonModule } from '@angular/material/button';
 import { ROUTES } from '../../constants/routes.constants';
 
 interface MenuItem {
@@ -16,26 +15,15 @@ interface MenuItem {
 
 @Component({
   selector: 'app-sidebar',
-  imports: [CommonModule, RouterModule, NzMenuModule, NzIconModule],
+  imports: [CommonModule, RouterModule, MatIconModule, MatListModule, MatButtonModule],
   templateUrl: './sidebar.component.html',
   styleUrl: './sidebar.component.scss',
 })
 export class SidebarComponent {
-  private router = inject(Router);
-
   collapsed = input.required<boolean>();
   theme = input.required<'light' | 'dark'>();
 
-  // toSignal — конвертация Observable → Signal
-  currentUrl = toSignal(
-    // router.events — Observable, который эмитит события маршрутизации
-    this.router.events.pipe(
-      filter((event) => event instanceof NavigationEnd),
-      map((event) => (event as NavigationEnd).urlAfterRedirects),
-      startWith(this.router.url)
-    ),
-    { initialValue: this.router.url }
-  );
+  themeChange = output<'light' | 'dark'>();
 
   menuItems: MenuItem[] = [
     {
@@ -46,7 +34,7 @@ export class SidebarComponent {
     },
     {
       title: 'Портфель',
-      icon: 'bar-chart',
+      icon: 'bar_chart',
       route: ROUTES.PORTFOLIO,
     },
     {
@@ -56,11 +44,8 @@ export class SidebarComponent {
     },
   ];
 
-  isRouteActive = (route: string, exact?: boolean): boolean => {
-    const url = this.currentUrl() ?? '';
-    if (exact || route === ROUTES.HOME) {
-      return url === route || (route === ROUTES.HOME && url === '');
-    }
-    return url.startsWith(route);
-  };
+  onThemeToggle(): void {
+    const newTheme = this.theme() === 'dark' ? 'light' : 'dark';
+    this.themeChange.emit(newTheme);
+  }
 }

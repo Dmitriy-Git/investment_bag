@@ -1,18 +1,50 @@
-<ul 
-  nz-menu 
-  [nzMode]="collapsed() ? 'vertical' : 'inline'"
-  [nzTheme]="theme()"
-  [nzInlineCollapsed]="collapsed()"
-  class="sidebar-menu">
-  @for (item of menuItems; track item.route) {
-    <li nz-menu-item [class.ant-menu-item-selected]="isRouteActive(item.route, item.exact)">
-      <a [routerLink]="item.route">
-        <nz-icon [nzType]="item.icon" />
+<div class="sidebar-container" [class.is-theme-dark]="theme() === 'dark'" [class.is-theme-light]="theme() === 'light'">
+  @if (!collapsed()) {
+    <div class="sidebar-logo">
+      <span class="logo-text">Investment Bag</span>
+    </div>
+  }
+
+  <div class="sidebar-search">
+    <mat-icon class="search-icon" aria-hidden="true">search</mat-icon>
+    @if (!collapsed()) {
+      <input
+        type="text"
+        class="search-input"
+        placeholder="Search"
+        [attr.aria-label]="'Search'"
+      />
+    }
+  </div>
+
+  <mat-nav-list
+    class="sidebar-menu"
+    [class.is-collapsed]="collapsed()">
+    @for (item of menuItems; track item.route) {
+      <a
+        mat-list-item
+        [routerLink]="item.route"
+        routerLinkActive="is-active"
+        [routerLinkActiveOptions]="{ exact: item.exact ?? false }">
+        <mat-icon aria-hidden="true" class="menu-icon">{{ item.icon }}</mat-icon>
         @if (!collapsed()) {
           <span class="menu-title">{{ item.title }}</span>
         }
       </a>
-    </li>
+    }
+  </mat-nav-list>
+
+  @if (!collapsed()) {
+    <div class="sidebar-footer">
+      <button
+        type="button"
+        class="theme-toggle"
+        (click)="onThemeToggle()"
+        [attr.aria-label]="'Toggle theme. Current: ' + (theme() === 'dark' ? 'Dark' : 'Light')">
+        <mat-icon aria-hidden="true">{{ theme() === 'dark' ? 'light_mode' : 'dark_mode' }}</mat-icon>
+        <span>{{ theme() === 'dark' ? 'Light Mode' : 'Dark Mode' }}</span>
+      </button>
+    </div>
   }
-</ul>
+</div>
 

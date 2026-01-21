@@ -4,13 +4,13 @@
   </header>
 
   @if (isLoading()) {
-    <p class="status">Загрузка портфеля…</p>
+  <p class="status">Загрузка портфеля…</p>
   } @else if (errorMessage(); as message) {
-    <p class="status status--error" role="alert">{{ message }}</p>
+  <p class="status status--error" role="alert">{{ message }}</p>
   } @else if (!hasPositions()) {
-    <p class="status">Пока нет позиций в портфеле.</p>
+  <p class="status">Пока нет позиций в портфеле.</p>
   } @else {
-    <portfolio-allocation-chart [portfolioValue]="portfolioValue()" />
+  <button mat-raised-button type="button" (click)="openModal()">Добавить инструмент в портфель</button>
+  <portfolio-allocation-chart [portfolioValue]="portfolioValue()" />
   }
 </section>
-

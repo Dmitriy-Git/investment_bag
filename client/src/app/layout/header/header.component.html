@@ -1,25 +1,42 @@
-<div class="header-container">
+<mat-toolbar class="header-container" role="banner" [class.is-theme-dark]="theme() === 'dark'" [class.is-theme-light]="theme() === 'light'">
   <div class="header-left">
-    <button 
-      nz-button 
-      nzType="text" 
-      nzSize="large"
+    <button
+      mat-icon-button
+      type="button"
       (click)="onToggleCollapse()"
-      class="menu-trigger">
-      <span nz-icon [nzType]="collapsed() ? menuUnfoldIcon : menuFoldIcon"></span>
+      class="menu-trigger"
+      [attr.aria-label]="collapsed() ? 'Expand sidebar' : 'Collapse sidebar'">
+      <mat-icon aria-hidden="true">{{ collapsed() ? 'menu_open' : 'menu' }}</mat-icon>
     </button>
-    <h1 class="app-title">Investment Bag</h1>
+    <h1 class="app-title">Admin Dashboard</h1>
   </div>
+
+  <span class="header-spacer"></span>
+
   <div class="header-right">
-    <button nz-button nzType="text" nz-dropdown [nzDropdownMenu]="menu">
-      <span>Тема: {{ theme() === 'dark' ? 'Темная' : 'Светлая' }}</span>
+    <button
+      mat-icon-button
+      type="button"
+      class="header-icon-button"
+      [attr.aria-label]="'Search'">
+      <mat-icon aria-hidden="true">search</mat-icon>
     </button>
-    <nz-dropdown-menu #menu="nzDropdownMenu">
-      <ul nz-menu nzSelectable>
-        <li nz-menu-item (click)="onThemeChange('light')">Светлая</li>
-        <li nz-menu-item (click)="onThemeChange('dark')">Темная</li>
-      </ul>
-    </nz-dropdown-menu>
+
+    <button
+      mat-icon-button
+      type="button"
+      class="header-icon-button notification-button"
+      [attr.aria-label]="'Notifications'">
+      <mat-icon aria-hidden="true">notifications</mat-icon>
+      <span class="notification-badge" aria-hidden="true">3</span>
+    </button>
+
+    <div class="user-info">
+      <div class="user-avatar">
+        <span class="avatar-text">SM</span>
+      </div>
+      <span class="user-name">Sarash Menon</span>
+    </div>
   </div>
-</div>
+</mat-toolbar>
 

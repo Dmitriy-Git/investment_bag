@@ -1,29 +1,80 @@
-.app-layout {
-  min-height: 100vh;
+// CSS переменные для layout
+:host {
+  --sidebar-width-expanded: 17.5rem; // ~280px при базовом размере 16px
+  --sidebar-width-collapsed: 5rem; // ~80px при базовом размере 16px
+  --header-height: 4.5rem; // ~72px
+  --content-padding: 1.5rem; // ~24px
+  --transition-duration: 0.3s;
 }
 
-.app-header {
-  padding: 0;
-  background: #fff;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  position: sticky;
-  top: 0;
-  z-index: 1000;
+.app-layout {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.app-layout.is-theme-dark {
+  background: var(--bg-secondary, #0f0f0f);
+  color: var(--text-primary, rgba(255, 255, 255, 0.87));
+}
+
+.app-layout.is-theme-light {
+  background: var(--bg-secondary, #f5f5f5);
+  color: var(--text-primary, rgba(0, 0, 0, 0.87));
+}
+
+.app-sidenav-container {
+  flex: 1;
+  min-height: 0;
+  height: 100vh;
+  width: 100%;
+  display: flex;
 }
 
 .app-sider {
-  overflow: auto;
-  height: calc(100vh - 64px);
-  position: sticky;
-  top: 64px;
-  left: 0;
+  height: 100%;
+  width: var(--sidebar-width-expanded);
+  border-right: 1px solid var(--border-color, rgba(0, 0, 0, 0.08));
+  transition: width var(--transition-duration) ease;
+
+  &.is-collapsed {
+    width: var(--sidebar-width-collapsed);
+  }
 }
 
 .app-content {
-  margin: 24px;
-  padding: 24px;
-  background: #fff;
-  min-height: calc(100vh - 112px);
-  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  overflow: hidden;
+}
+
+.app-header {
+  flex-shrink: 0;
+  width: 100%;
+  background: var(--header-bg, #fff);
+  box-shadow: 0 0.0625rem 0.1875rem var(--shadow, rgba(0, 0, 0, 0.1));
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  border-bottom: 1px solid var(--border-color, rgba(0, 0, 0, 0.08));
+}
+
+.app-layout.is-theme-dark .app-header {
+  background: var(--header-bg, #1a1a1a);
+  border-bottom-color: var(--border-color, rgba(255, 255, 255, 0.12));
+  box-shadow: 0 0.0625rem 0.1875rem var(--shadow, rgba(0, 0, 0, 0.3));
+}
+
+.app-main {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: var(--content-padding);
+  width: 100%;
+  min-height: 0;
 }
 

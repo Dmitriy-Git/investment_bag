@@ -3,36 +3,16 @@ import { provideRouter } from '@angular/router';
 import { routes } from './app.routes';
 import { provideClientHydration, withEventReplay } from '@angular/platform-browser';
 import { provideHttpClient, withFetch, withInterceptors } from '@angular/common/http';
-import { provideNzIcons } from 'ng-zorro-antd/icon';
 import { provideEchartsCore } from 'ngx-echarts';
 import * as echarts from 'echarts/core';
 import { PieChart } from 'echarts/charts';
 import { TitleComponent, TooltipComponent, LegendComponent } from 'echarts/components';
 import { CanvasRenderer } from 'echarts/renderers';
-
-// Register the required components
-echarts.use([PieChart, TitleComponent, TooltipComponent, LegendComponent, CanvasRenderer]);
-
-import {
-  MenuFoldOutline,
-  MenuUnfoldOutline,
-  AppstoreOutline,
-  StarOutline,
-  BarChartOutline,
-  HomeOutline,
-} from '@ant-design/icons-angular/icons';
-import type { IconDefinition } from '@ant-design/icons-angular';
 import { errorInterceptor } from './core/interceptors/errors.interceptor';
 import { baseUrlInterceptor } from './core/interceptors/baseURL.interceptor';
 
-const icons: IconDefinition[] = [
-  MenuFoldOutline,
-  MenuUnfoldOutline,
-  AppstoreOutline,
-  StarOutline,
-  BarChartOutline,
-  HomeOutline,
-];
+// Register the required components
+echarts.use([PieChart, TitleComponent, TooltipComponent, LegendComponent, CanvasRenderer]);
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -40,7 +20,6 @@ export const appConfig: ApplicationConfig = {
     provideRouter(routes),
     provideHttpClient(withFetch(), withInterceptors([baseUrlInterceptor, errorInterceptor])),
     provideClientHydration(withEventReplay()),
-    provideNzIcons(icons),
     provideEchartsCore({ echarts }),
   ],
 };

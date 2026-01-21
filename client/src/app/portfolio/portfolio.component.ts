@@ -1,19 +1,23 @@
 import { ChangeDetectionStrategy, Component, computed, inject, resource, signal } from '@angular/core';
-import { firstValueFrom } from 'rxjs';
+import { MatButtonModule } from '@angular/material/button';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { firstValueFrom, filter } from 'rxjs';
 import { PortfolioService } from './services/portfolio.service';
 import { USER_ID } from '../constants/user.constants';
 import type { PortfolioPosition } from '../models/portfolio.model';
-import { AllocationChartComponent } from './components';
+import { AllocationChartComponent, PortfolioModalComponent } from './components';
+import type { PortfolioModalData } from './components/portfolio-modal/portfolio-modal.component';
 
 @Component({
   selector: 'app-portfolio',
-  imports: [AllocationChartComponent],
+  imports: [AllocationChartComponent, MatButtonModule, MatDialogModule],
   templateUrl: './portfolio.component.html',
   styleUrl: './portfolio.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class PortfolioComponent {
   private readonly portfolioService = inject(PortfolioService);
+  private readonly dialog = inject(MatDialog);
   readonly userId = signal<number>(USER_ID);
 
   readonly portfolioResource = resource({
@@ -33,4 +37,26 @@ export class PortfolioComponent {
   });
 
   readonly hasPositions = computed<boolean>(() => this.portfolioValue().length > 0);
+
+  openModal(): void {
+    const dialogRef = this.dialog.open<PortfolioModalComponent, PortfolioModalData, boolean>(
+      PortfolioModalComponent,
+      {
+        autoFocus: 'dialog',
+        restoreFocus: true,
+        data: {
+          userId: this.userId(),
+        },
+      }
+    );
+
+    dialogRef
+      .afterClosed()
+      .pipe(filter((result) => {
+        return result === true
+      }))
+      .subscribe(() => {
+        this.portfolioResource.reload();
+      });
+  }
 }
