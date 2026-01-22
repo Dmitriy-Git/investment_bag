@@ -32,6 +32,7 @@ async function bootstrap() {
     .addTag('users', 'Операции с пользователями')
     .addTag('portfolio', 'Операции с портфелем')
     .addTag('favorites', 'Избранные инструменты')
+    .addTag('T-Invest', 'Работа с T-Invest API')
     .build();
 
   const document = SwaggerModule.createDocument(app, config);

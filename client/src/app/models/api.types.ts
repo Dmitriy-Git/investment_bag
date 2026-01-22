@@ -93,6 +93,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/t-invest/currencies/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Получить информацию об одной валюте по идентификатору */
+        get: operations["TInvestController_getCurrencyBy"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/t-invest/bonds": {
         parameters: {
             query?: never;
@@ -102,23 +119,6 @@ export interface paths {
         };
         /** Получить список облигаций */
         get: operations["TInvestController_getBonds"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/t-invest/shares": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Получить список акций */
-        get: operations["TInvestController_getShares"];
         put?: never;
         post?: never;
         delete?: never;
@@ -144,15 +144,15 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/t-invest/currencies/{id}": {
+    "/t-invest/shares": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        /** Получить информацию об одной валюте по идентификатору */
-        get: operations["TInvestController_getCurrencyBy"];
+        /** Получить список акций */
+        get: operations["TInvestController_getShares"];
         put?: never;
         post?: never;
         delete?: never;
@@ -249,6 +249,564 @@ export interface components {
             instrumentId: string;
             instrumentType: string;
             notes?: string;
+        };
+        CurrencyDto: {
+            /**
+             * @description FIGI инструмента
+             * @example BBG0013HGFT4
+             */
+            figi: string;
+            /**
+             * @description Тикер инструмента
+             * @example USD000UTSTOM
+             */
+            ticker: string;
+            /**
+             * @description Код класса инструмента
+             * @example CETS
+             */
+            classCode: string;
+            /**
+             * @description ISIN инструмента
+             * @example
+             */
+            isin: string;
+            /**
+             * @description Лотность инструмента
+             * @example 1000
+             */
+            lot: number;
+            /**
+             * @description Валюта расчётов
+             * @example rub
+             */
+            currency: string;
+            /**
+             * @description Название инструмента
+             * @example Доллар США
+             */
+            name: string;
+            /**
+             * @description Номинал
+             * @example 1
+             */
+            nominal: number;
+            /**
+             * @description Текущий торговый статус
+             * @example SECURITY_TRADING_STATUS_NORMAL_TRADING
+             */
+            tradingStatus: string;
+            /**
+             * @description Реальная площадка торговли
+             * @example REAL_EXCHANGE_MOEX
+             */
+            realExchange: string;
+            /**
+             * @description UID позиции
+             * @example 6e5a2c8e-7b3d-4f1a-9c2e-1d4f5a6b7c8d
+             */
+            positionUid: string;
+            /**
+             * @description Флаг доступности для ИИС
+             * @example false
+             */
+            forIisFlag: boolean;
+            /**
+             * @description Флаг для квалифицированных инвесторов
+             * @example false
+             */
+            forQualInvestorFlag: boolean;
+            /**
+             * @description Флаг торговли в выходные
+             * @example false
+             */
+            weekendFlag: boolean;
+            /**
+             * @description Флаг блокировки TCA
+             * @example false
+             */
+            blockedTcaFlag: boolean;
+            /**
+             * @description Флаг доступности для торговли через API
+             * @example true
+             */
+            apiTradeAvailableFlag: boolean;
+        };
+        BondDto: {
+            /**
+             * @description FIGI инструмента
+             * @example BBG00T22WKV5
+             */
+            figi: string;
+            /**
+             * @description Тикер инструмента
+             * @example SU26238RMFS4
+             */
+            ticker: string;
+            /**
+             * @description Код класса инструмента
+             * @example TQOB
+             */
+            classCode: string;
+            /**
+             * @description ISIN инструмента
+             * @example RU000A1038V6
+             */
+            isin: string;
+            /**
+             * @description Лотность инструмента
+             * @example 1
+             */
+            lot: number;
+            /**
+             * @description Валюта расчётов
+             * @example rub
+             */
+            currency: string;
+            /**
+             * @description Название инструмента
+             * @example ОФЗ 26238
+             */
+            name: string;
+            /**
+             * @description Торговая площадка
+             * @example MOEX
+             */
+            exchange: string;
+            /**
+             * @description Количество выплат по купонам в год
+             * @example 2
+             */
+            couponQuantityPerYear: number;
+            /**
+             * @description Дата погашения облигации
+             * @example 2041-05-21T00:00:00Z
+             */
+            maturityDate: string;
+            /**
+             * @description Номинал
+             * @example 1000
+             */
+            nominal: number;
+            /**
+             * @description Дата государственной регистрации
+             * @example 2021-04-13T00:00:00Z
+             */
+            stateRegDate: string;
+            /**
+             * @description Дата размещения
+             * @example 2021-04-21T00:00:00Z
+             */
+            placementDate: string;
+            /**
+             * @description Цена размещения
+             * @example 1000
+             */
+            placementPrice: number;
+            /**
+             * @description Накопленный купонный доход
+             * @example 25.5
+             */
+            aciValue: number;
+            /**
+             * @description Код страны риска
+             * @example RU
+             */
+            countryOfRisk: string;
+            /**
+             * @description Название страны риска
+             * @example Российская Федерация
+             */
+            countryOfRiskName: string;
+            /**
+             * @description Сектор экономики
+             * @example government
+             */
+            sector: string;
+            /**
+             * @description Форма выпуска
+             * @example documentary
+             */
+            issueKind: string;
+            /**
+             * @description Размер выпуска
+             * @example 350000000000
+             */
+            issueSize: number;
+            /**
+             * @description Плановый размер выпуска
+             * @example 350000000000
+             */
+            issueSizePlan: number;
+            /**
+             * @description Текущий торговый статус
+             * @example SECURITY_TRADING_STATUS_NORMAL_TRADING
+             */
+            tradingStatus: string;
+            /**
+             * @description Флаг внебиржевого инструмента
+             * @example false
+             */
+            otcFlag: boolean;
+            /**
+             * @description Флаг доступности для покупки
+             * @example true
+             */
+            buyAvailableFlag: boolean;
+            /**
+             * @description Флаг доступности для продажи
+             * @example true
+             */
+            sellAvailableFlag: boolean;
+            /**
+             * @description Флаг плавающего купона
+             * @example false
+             */
+            floatingCouponFlag: boolean;
+            /**
+             * @description Флаг бессрочной облигации
+             * @example false
+             */
+            perpetualFlag: boolean;
+            /**
+             * @description Флаг амортизации
+             * @example false
+             */
+            amortizationFlag: boolean;
+            /**
+             * @description Минимальный шаг цены
+             * @example 0.01
+             */
+            minPriceIncrement: number;
+            /**
+             * @description Флаг доступности для торговли через API
+             * @example true
+             */
+            apiTradeAvailableFlag: boolean;
+            /**
+             * @description Уникальный идентификатор инструмента
+             * @example 6e5a2c8e-7b3d-4f1a-9c2e-1d4f5a6b7c8d
+             */
+            uid: string;
+            /**
+             * @description Реальная площадка торговли
+             * @example REAL_EXCHANGE_MOEX
+             */
+            realExchange: string;
+            /**
+             * @description UID позиции
+             * @example 7f6b3d9e-8c4e-5g2b-0d3f-2e5g6a7b8c9e
+             */
+            positionUid: string;
+            /**
+             * @description Флаг доступности для ИИС
+             * @example true
+             */
+            forIisFlag: boolean;
+            /**
+             * @description Флаг для квалифицированных инвесторов
+             * @example false
+             */
+            forQualInvestorFlag: boolean;
+            /**
+             * @description Флаг торговли в выходные
+             * @example false
+             */
+            weekendFlag: boolean;
+            /**
+             * @description Флаг блокировки TCA
+             * @example false
+             */
+            blockedTcaFlag: boolean;
+            /**
+             * @description Первый минимальный шаг цены
+             * @example 0.01
+             */
+            firstMinPriceIncrement: number;
+            /**
+             * @description Первое минимальное количество
+             * @example 1
+             */
+            firstMinQuantity: number;
+            /**
+             * @description Уровень риска
+             * @example RISK_LEVEL_LOW
+             */
+            riskLevel?: string;
+        };
+        ShareDto: {
+            /**
+             * @description FIGI инструмента
+             * @example BBG004730N88
+             */
+            figi: string;
+            /**
+             * @description Тикер инструмента
+             * @example SBER
+             */
+            ticker: string;
+            /**
+             * @description Код класса инструмента
+             * @example TQBR
+             */
+            classCode: string;
+            /**
+             * @description ISIN инструмента
+             * @example RU0009029540
+             */
+            isin: string;
+            /**
+             * @description Лотность инструмента
+             * @example 10
+             */
+            lot: number;
+            /**
+             * @description Валюта расчётов
+             * @example rub
+             */
+            currency: string;
+            /**
+             * @description Название инструмента
+             * @example Сбер Банк
+             */
+            name: string;
+            /**
+             * @description Торговая площадка
+             * @example MOEX
+             */
+            exchange: string;
+            /**
+             * @description Дата IPO
+             * @example 2007-07-12T00:00:00Z
+             */
+            ipoDate: string;
+            /**
+             * @description Размер выпуска
+             * @example 21586948000
+             */
+            issueSize: number;
+            /**
+             * @description Код страны риска
+             * @example RU
+             */
+            countryOfRisk: string;
+            /**
+             * @description Название страны риска
+             * @example Российская Федерация
+             */
+            countryOfRiskName: string;
+            /**
+             * @description Сектор экономики
+             * @example financial
+             */
+            sector: string;
+            /**
+             * @description Тип акции
+             * @example SHARE_TYPE_COMMON
+             */
+            shareType: string;
+            /**
+             * @description Текущий торговый статус
+             * @example SECURITY_TRADING_STATUS_NORMAL_TRADING
+             */
+            tradingStatus: string;
+            /**
+             * @description Флаг внебиржевого инструмента
+             * @example false
+             */
+            otcFlag: boolean;
+            /**
+             * @description Флаг доступности для покупки
+             * @example true
+             */
+            buyAvailableFlag: boolean;
+            /**
+             * @description Флаг доступности для продажи
+             * @example true
+             */
+            sellAvailableFlag: boolean;
+            /**
+             * @description Флаг дивидендной акции
+             * @example true
+             */
+            divYieldFlag: boolean;
+            /**
+             * @description Вид акции
+             * @example SHARE_KIND_COMMON
+             */
+            shareKind: string;
+            /**
+             * @description Минимальный шаг цены
+             * @example 0.01
+             */
+            minPriceIncrement: number;
+            /**
+             * @description Флаг доступности для торговли через API
+             * @example true
+             */
+            apiTradeAvailableFlag: boolean;
+            /**
+             * @description Уникальный идентификатор инструмента
+             * @example e6123145-9665-43e0-8413-cd61b8aa9b13
+             */
+            uid: string;
+            /**
+             * @description Реальная площадка торговли
+             * @example REAL_EXCHANGE_MOEX
+             */
+            realExchange: string;
+            /**
+             * @description UID позиции
+             * @example f6124256-0776-54f1-9524-de72c9bb0c24
+             */
+            positionUid: string;
+            /**
+             * @description Флаг доступности для ИИС
+             * @example true
+             */
+            forIisFlag: boolean;
+            /**
+             * @description Флаг для квалифицированных инвесторов
+             * @example false
+             */
+            forQualInvestorFlag: boolean;
+            /**
+             * @description Флаг торговли в выходные
+             * @example false
+             */
+            weekendFlag: boolean;
+            /**
+             * @description Флаг блокировки TCA
+             * @example false
+             */
+            blockedTcaFlag: boolean;
+            /**
+             * @description Первый минимальный шаг цены
+             * @example 0.01
+             */
+            firstMinPriceIncrement: number;
+            /**
+             * @description Первое минимальное количество
+             * @example 1
+             */
+            firstMinQuantity: number;
+            /**
+             * @description Уровень риска
+             * @example RISK_LEVEL_MODERATE
+             */
+            riskLevel?: string;
+        };
+        InstrumentDto: {
+            /**
+             * @description FIGI инструмента
+             * @example BBG004730N88
+             */
+            figi: string;
+            /**
+             * @description Тикер инструмента
+             * @example SBER
+             */
+            ticker: string;
+            /**
+             * @description Код класса инструмента
+             * @example TQBR
+             */
+            classCode: string;
+            /**
+             * @description ISIN инструмента
+             * @example RU0009029540
+             */
+            isin?: string;
+            /**
+             * @description Лотность инструмента
+             * @example 10
+             */
+            lot: number;
+            /**
+             * @description Валюта расчётов
+             * @example rub
+             */
+            currency: string;
+            /**
+             * @description Название инструмента
+             * @example Сбер Банк
+             */
+            name: string;
+            /**
+             * @description Торговая площадка
+             * @example MOEX
+             */
+            exchange?: string;
+            /**
+             * @description Текущий торговый статус
+             * @example SECURITY_TRADING_STATUS_NORMAL_TRADING
+             */
+            tradingStatus?: string;
+            /**
+             * @description Флаг внебиржевого инструмента
+             * @example false
+             */
+            otcFlag?: boolean;
+            /**
+             * @description Флаг доступности для покупки
+             * @example true
+             */
+            buyAvailableFlag?: boolean;
+            /**
+             * @description Флаг доступности для продажи
+             * @example true
+             */
+            sellAvailableFlag?: boolean;
+            /**
+             * @description Флаг доступности для торговли через API
+             * @example true
+             */
+            apiTradeAvailableFlag?: boolean;
+            /**
+             * @description Уникальный идентификатор инструмента
+             * @example e6123145-9665-43e0-8413-cd61b8aa9b13
+             */
+            uid: string;
+            /**
+             * @description Реальная площадка торговли
+             * @example REAL_EXCHANGE_MOEX
+             */
+            realExchange?: string;
+            /**
+             * @description UID позиции
+             * @example f6124256-0776-54f1-9524-de72c9bb0c24
+             */
+            positionUid: string;
+            /**
+             * @description Флаг доступности для ИИС
+             * @example true
+             */
+            forIisFlag?: boolean;
+            /**
+             * @description Флаг для квалифицированных инвесторов
+             * @example false
+             */
+            forQualInvestorFlag?: boolean;
+            /**
+             * @description Флаг торговли в выходные
+             * @example false
+             */
+            weekendFlag?: boolean;
+            /**
+             * @description Флаг блокировки TCA
+             * @example false
+             */
+            blockedTcaFlag?: boolean;
+            /**
+             * @description Тип инструмента
+             * @example INSTRUMENT_TYPE_SHARE
+             * @enum {string}
+             */
+            instrumentKind?: "INSTRUMENT_TYPE_UNSPECIFIED" | "INSTRUMENT_TYPE_BOND" | "INSTRUMENT_TYPE_SHARE" | "INSTRUMENT_TYPE_CURRENCY" | "INSTRUMENT_TYPE_ETF" | "INSTRUMENT_TYPE_FUTURES" | "INSTRUMENT_TYPE_OPTION" | "INSTRUMENT_TYPE_SP" | "INSTRUMENT_TYPE_WARRANT" | "INSTRUMENT_TYPE_CLEARING_CERTIFICATE";
+        };
+        FindInstrumentResponseDto: {
+            /** @description Список найденных инструментов */
+            instruments: components["schemas"]["InstrumentDto"][];
         };
         CreatePortfolioPositionDto: {
             instrumentId: string;
@@ -468,11 +1026,15 @@ export interface operations {
     };
     TInvestController_getCurrencies: {
         parameters: {
-            query: {
-                instrumentStatus: string;
-                instrumentExchange: string;
-                page: number;
-                limit: number;
+            query?: {
+                /** @description Номер страницы (начинается с 1) */
+                page?: number;
+                /** @description Количество элементов на странице */
+                limit?: number;
+                /** @description Статус инструмента */
+                instrumentStatus?: "INSTRUMENT_STATUS_UNSPECIFIED" | "INSTRUMENT_STATUS_BASE" | "INSTRUMENT_STATUS_ALL";
+                /** @description Тип биржи */
+                instrumentExchange?: "INSTRUMENT_EXCHANGE_UNSPECIFIED" | "INSTRUMENT_EXCHANGE_DEALER";
             };
             header?: never;
             path?: never;
@@ -485,38 +1047,46 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+        };
+    };
+    TInvestController_getCurrencyBy: {
+        parameters: {
+            query?: {
+                /** @description Тип идентификатора инструмента */
+                idType?: "INSTRUMENT_ID_UNSPECIFIED" | "INSTRUMENT_ID_TYPE_FIGI" | "INSTRUMENT_ID_TYPE_TICKER" | "INSTRUMENT_ID_TYPE_UID" | "INSTRUMENT_ID_TYPE_POSITION_UID";
+                /** @description Код класса инструмента */
+                classCode?: string;
+            };
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CurrencyDto"];
+                };
             };
         };
     };
     TInvestController_getBonds: {
         parameters: {
-            query: {
-                instrumentStatus: string;
-                instrumentExchange: string;
-                page: number;
-                limit: number;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    TInvestController_getShares: {
-        parameters: {
-            query: {
-                instrumentStatus: string;
-                instrumentExchange: string;
-                page: number;
-                limit: number;
+            query?: {
+                /** @description Номер страницы (начинается с 1) */
+                page?: number;
+                /** @description Количество элементов на странице */
+                limit?: number;
+                /** @description Статус инструмента */
+                instrumentStatus?: "INSTRUMENT_STATUS_UNSPECIFIED" | "INSTRUMENT_STATUS_BASE" | "INSTRUMENT_STATUS_ALL";
+                /** @description Тип биржи */
+                instrumentExchange?: "INSTRUMENT_EXCHANGE_UNSPECIFIED" | "INSTRUMENT_EXCHANGE_DEALER";
             };
             header?: never;
             path?: never;
@@ -534,9 +1104,11 @@ export interface operations {
     };
     TInvestController_getBondBy: {
         parameters: {
-            query: {
-                idType: string;
-                classCode: string;
+            query?: {
+                /** @description Тип идентификатора инструмента */
+                idType?: "INSTRUMENT_ID_UNSPECIFIED" | "INSTRUMENT_ID_TYPE_FIGI" | "INSTRUMENT_ID_TYPE_TICKER" | "INSTRUMENT_ID_TYPE_UID" | "INSTRUMENT_ID_TYPE_POSITION_UID";
+                /** @description Код класса инструмента */
+                classCode?: string;
             };
             header?: never;
             path: {
@@ -551,21 +1123,25 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": Record<string, never>;
+                    "application/json": components["schemas"]["BondDto"];
                 };
             };
         };
     };
-    TInvestController_getCurrencyBy: {
+    TInvestController_getShares: {
         parameters: {
-            query: {
-                idType: string;
-                classCode: string;
+            query?: {
+                /** @description Номер страницы (начинается с 1) */
+                page?: number;
+                /** @description Количество элементов на странице */
+                limit?: number;
+                /** @description Статус инструмента */
+                instrumentStatus?: "INSTRUMENT_STATUS_UNSPECIFIED" | "INSTRUMENT_STATUS_BASE" | "INSTRUMENT_STATUS_ALL";
+                /** @description Тип биржи */
+                instrumentExchange?: "INSTRUMENT_EXCHANGE_UNSPECIFIED" | "INSTRUMENT_EXCHANGE_DEALER";
             };
             header?: never;
-            path: {
-                id: string;
-            };
+            path?: never;
             cookie?: never;
         };
         requestBody?: never;
@@ -574,17 +1150,17 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content: {
-                    "application/json": Record<string, never>;
-                };
+                content?: never;
             };
         };
     };
     TInvestController_getShareBy: {
         parameters: {
-            query: {
-                idType: string;
-                classCode: string;
+            query?: {
+                /** @description Тип идентификатора инструмента */
+                idType?: "INSTRUMENT_ID_UNSPECIFIED" | "INSTRUMENT_ID_TYPE_FIGI" | "INSTRUMENT_ID_TYPE_TICKER" | "INSTRUMENT_ID_TYPE_UID" | "INSTRUMENT_ID_TYPE_POSITION_UID";
+                /** @description Код класса инструмента */
+                classCode?: string;
             };
             header?: never;
             path: {
@@ -599,7 +1175,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": Record<string, never>;
+                    "application/json": components["schemas"]["ShareDto"];
                 };
             };
         };
@@ -607,8 +1183,10 @@ export interface operations {
     TInvestController_findInstrument: {
         parameters: {
             query: {
+                /** @description Строка поиска (тикер, FIGI, ISIN или название) */
                 query: string;
-                instrumentKind: string;
+                /** @description Тип инструмента для фильтрации */
+                instrumentKind?: "INSTRUMENT_TYPE_UNSPECIFIED" | "INSTRUMENT_TYPE_BOND" | "INSTRUMENT_TYPE_SHARE" | "INSTRUMENT_TYPE_CURRENCY" | "INSTRUMENT_TYPE_ETF" | "INSTRUMENT_TYPE_FUTURES" | "INSTRUMENT_TYPE_OPTION" | "INSTRUMENT_TYPE_SP" | "INSTRUMENT_TYPE_WARRANT" | "INSTRUMENT_TYPE_CLEARING_CERTIFICATE";
             };
             header?: never;
             path?: never;
@@ -621,7 +1199,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": Record<string, never>;
+                    "application/json": components["schemas"]["FindInstrumentResponseDto"];
                 };
             };
         };

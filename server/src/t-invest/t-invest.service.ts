@@ -3,36 +3,36 @@ import { HttpService } from "@nestjs/axios";
 import { firstValueFrom } from "rxjs";
 import { TInvestConfig } from "./t-invest.config";
 import {
-  Currency,
-  GetCurrenciesRequest,
-  GetCurrenciesResponse,
-  GetCurrencyByRequest,
-  GetCurrencyByResponse,
-} from "./interfaces/currencies.interface";
-import {
-  Bond,
-  GetBondsRequest,
-  GetBondsResponse,
-  GetBondByRequest,
-  GetBondByResponse,
-} from "./interfaces/bonds.interface";
-import {
-  Share,
-  GetSharesRequest,
-  GetSharesResponse,
-  GetShareByRequest,
-  GetShareByResponse,
-} from "./interfaces/shares.interface";
-import {
   InstrumentIdType,
   InstrumentStatus,
   InstrumentExchange,
-} from "./interfaces/common.interface";
-import {
-  FindInstrumentRequest,
-  FindInstrumentResponse,
-} from "./interfaces/instruments.interface";
+} from "./interfaces";
 import { PaginatedResponse } from "../common/pagination.interface";
+import {
+  GetCurrenciesQueryDto,
+  GetCurrenciesResponseDto,
+  GetCurrencyByResponseDto,
+  CurrencyDto,
+  GetBondsQueryDto,
+  GetBondsResponseDto,
+  GetBondByResponseDto,
+  BondDto,
+  GetSharesQueryDto,
+  GetSharesResponseDto,
+  GetShareByResponseDto,
+  ShareDto,
+  FindInstrumentQueryDto,
+  FindInstrumentResponseDto,
+} from "./dto";
+
+/**
+ * Параметры запроса инструмента по идентификатору
+ */
+interface GetInstrumentByParams {
+  id: string;
+  idType?: InstrumentIdType;
+  classCode?: string;
+}
 
 /**
  * Сервис для работы с T-Invest API
@@ -44,21 +44,21 @@ export class TInvestService {
     private readonly config: TInvestConfig
   ) {}
 
-  static preparedInstrumentsResponse<T>(
+  /**
+   * Подготовить пагинированный ответ
+   */
+  private static prepareInstrumentsResponse<T>(
     data: T[],
     page: number,
     limit: number
   ): PaginatedResponse<T> {
-    const allInstruments = data;
-    const totalItems = allInstruments.length;
+    const totalItems = data.length;
     const totalPages = Math.ceil(totalItems / limit);
 
-    // Вычисляем индексы для текущей страницы
     const startIndex = (page - 1) * limit;
     const endIndex = startIndex + limit;
 
-    // Получаем элементы для текущей страницы
-    const paginatedInstruments = allInstruments.slice(startIndex, endIndex);
+    const paginatedInstruments = data.slice(startIndex, endIndex);
 
     return {
       results: paginatedInstruments,
@@ -70,34 +70,30 @@ export class TInvestService {
 
   /**
    * Получить список валют
-   * @param params Параметры запроса (опционально)
-   * @returns Список валют
-   * @throws HttpException при ошибке запроса к API
    */
   async getCurrencies(
-    params?: GetCurrenciesRequest
-  ): Promise<PaginatedResponse<Currency>> {
+    params?: GetCurrenciesQueryDto
+  ): Promise<PaginatedResponse<CurrencyDto>> {
     const page = params?.page ?? 1;
     const limit = params?.limit ?? 10;
 
     const url = `${this.config.getApiUrl()}.InstrumentsService/Currencies`;
     const headers = this.config.getHeaders();
 
-    const requestBody: GetCurrenciesRequest = {
+    const requestBody = {
       instrumentStatus:
         params?.instrumentStatus || InstrumentStatus.UNSPECIFIED,
       instrumentExchange:
         params?.instrumentExchange || InstrumentExchange.UNSPECIFIED,
     };
 
-    // Получаем все валюты от API
     const response = await firstValueFrom(
-      this.httpService.post<GetCurrenciesResponse>(url, requestBody, {
+      this.httpService.post<GetCurrenciesResponseDto>(url, requestBody, {
         headers,
       })
     );
 
-    return TInvestService.preparedInstrumentsResponse(
+    return TInvestService.prepareInstrumentsResponse(
       response.data.instruments,
       page,
       limit
@@ -105,69 +101,53 @@ export class TInvestService {
   }
 
   /**
-   * Получить список облигаций
-   * @param params Параметры запроса (опционально)
-   * @returns Список облигаций
-   * @throws HttpException при ошибке запроса к API
+   * Получить информацию об одной валюте по идентификатору
    */
-  async getBonds(params?: GetBondsRequest): Promise<PaginatedResponse<Bond>> {
+  async getCurrencyBy(params: GetInstrumentByParams): Promise<CurrencyDto> {
+    const url = `${this.config.getApiUrl()}.InstrumentsService/CurrencyBy`;
+    const headers = this.config.getHeaders();
+
+    const requestBody = {
+      idType: params.idType || InstrumentIdType.UID,
+      id: params.id,
+      ...(params.classCode && { classCode: params.classCode }),
+    };
+
+    const response = await firstValueFrom(
+      this.httpService.post<GetCurrencyByResponseDto>(url, requestBody, {
+        headers,
+      })
+    );
+
+    return response.data.instrument;
+  }
+
+  /**
+   * Получить список облигаций
+   */
+  async getBonds(
+    params?: GetBondsQueryDto
+  ): Promise<PaginatedResponse<BondDto>> {
     const page = params?.page ?? 1;
     const limit = params?.limit ?? 100;
 
     const url = `${this.config.getApiUrl()}.InstrumentsService/Bonds`;
     const headers = this.config.getHeaders();
 
-    const requestBody: GetBondsRequest = {
+    const requestBody = {
       instrumentStatus:
         params?.instrumentStatus || InstrumentStatus.UNSPECIFIED,
       instrumentExchange:
         params?.instrumentExchange || InstrumentExchange.UNSPECIFIED,
     };
 
-    // Получаем все облигации от API
     const response = await firstValueFrom(
-      this.httpService.post<GetBondsResponse>(url, requestBody, {
+      this.httpService.post<GetBondsResponseDto>(url, requestBody, {
         headers,
       })
     );
 
-    return TInvestService.preparedInstrumentsResponse(
-      response.data.instruments,
-      page,
-      limit
-    );
-  }
-
-  /**
-   * Получить список акций
-   * @param params Параметры запроса (опционально)
-   * @returns Список акций
-   * @throws HttpException при ошибке запроса к API
-   */
-  async getShares(
-    params?: GetSharesRequest
-  ): Promise<PaginatedResponse<Share>> {
-    const page = params?.page ?? 1;
-    const limit = params?.limit ?? 50;
-
-    const url = `${this.config.getApiUrl()}.InstrumentsService/Shares`;
-    const headers = this.config.getHeaders();
-
-    const requestBody: GetSharesRequest = {
-      instrumentStatus:
-        params?.instrumentStatus || InstrumentStatus.UNSPECIFIED,
-      instrumentExchange:
-        params?.instrumentExchange || InstrumentExchange.UNSPECIFIED,
-    };
-
-    // Получаем все акции от API
-    const response = await firstValueFrom(
-      this.httpService.post<GetSharesResponse>(url, requestBody, {
-        headers,
-      })
-    );
-
-    return TInvestService.preparedInstrumentsResponse(
+    return TInvestService.prepareInstrumentsResponse(
       response.data.instruments,
       page,
       limit
@@ -176,22 +156,19 @@ export class TInvestService {
 
   /**
    * Получить информацию об одной облигации по идентификатору
-   * @param params Параметры запроса
-   * @returns Информация об облигации
-   * @throws HttpException при ошибке запроса к API
    */
-  async getBondBy(params: GetBondByRequest): Promise<Bond> {
+  async getBondBy(params: GetInstrumentByParams): Promise<BondDto> {
     const url = `${this.config.getApiUrl()}.InstrumentsService/BondBy`;
     const headers = this.config.getHeaders();
 
-    const requestBody: GetBondByRequest = {
+    const requestBody = {
       idType: params.idType || InstrumentIdType.UID,
       id: params.id,
       ...(params.classCode && { classCode: params.classCode }),
     };
 
     const response = await firstValueFrom(
-      this.httpService.post<GetBondByResponse>(url, requestBody, {
+      this.httpService.post<GetBondByResponseDto>(url, requestBody, {
         headers,
       })
     );
@@ -200,48 +177,52 @@ export class TInvestService {
   }
 
   /**
-   * Получить информацию об одной валюте по идентификатору
-   * @param params Параметры запроса
-   * @returns Информация о валюте
-   * @throws HttpException при ошибке запроса к API
+   * Получить список акций
    */
-  async getCurrencyBy(params: GetCurrencyByRequest): Promise<Currency> {
-    const url = `${this.config.getApiUrl()}.InstrumentsService/CurrencyBy`;
+  async getShares(
+    params?: GetSharesQueryDto
+  ): Promise<PaginatedResponse<ShareDto>> {
+    const page = params?.page ?? 1;
+    const limit = params?.limit ?? 50;
+
+    const url = `${this.config.getApiUrl()}.InstrumentsService/Shares`;
     const headers = this.config.getHeaders();
 
-    const requestBody: GetCurrencyByRequest = {
-      idType: params.idType || InstrumentIdType.UID,
-      id: params.id,
-      ...(params.classCode && { classCode: params.classCode }),
+    const requestBody = {
+      instrumentStatus:
+        params?.instrumentStatus || InstrumentStatus.UNSPECIFIED,
+      instrumentExchange:
+        params?.instrumentExchange || InstrumentExchange.UNSPECIFIED,
     };
 
     const response = await firstValueFrom(
-      this.httpService.post<GetCurrencyByResponse>(url, requestBody, {
+      this.httpService.post<GetSharesResponseDto>(url, requestBody, {
         headers,
       })
     );
 
-    return response.data.instrument;
+    return TInvestService.prepareInstrumentsResponse(
+      response.data.instruments,
+      page,
+      limit
+    );
   }
 
   /**
    * Получить информацию об одной акции по идентификатору
-   * @param params Параметры запроса
-   * @returns Информация об акции
-   * @throws HttpException при ошибке запроса к API
    */
-  async getShareBy(params: GetShareByRequest): Promise<Share> {
+  async getShareBy(params: GetInstrumentByParams): Promise<ShareDto> {
     const url = `${this.config.getApiUrl()}.InstrumentsService/ShareBy`;
     const headers = this.config.getHeaders();
 
-    const requestBody: GetShareByRequest = {
+    const requestBody = {
       idType: params.idType || InstrumentIdType.UID,
       id: params.id,
       ...(params.classCode && { classCode: params.classCode }),
     };
 
     const response = await firstValueFrom(
-      this.httpService.post<GetShareByResponse>(url, requestBody, {
+      this.httpService.post<GetShareByResponseDto>(url, requestBody, {
         headers,
       })
     );
@@ -251,23 +232,20 @@ export class TInvestService {
 
   /**
    * Поиск инструментов по запросу
-   * @param params Параметры запроса поиска
-   * @returns Список найденных инструментов
-   * @throws HttpException при ошибке запроса к API
    */
   async findInstrument(
-    params: FindInstrumentRequest
-  ): Promise<FindInstrumentResponse> {
+    params: FindInstrumentQueryDto
+  ): Promise<FindInstrumentResponseDto> {
     const url = `${this.config.getApiUrl()}.InstrumentsService/FindInstrument`;
     const headers = this.config.getHeaders();
 
-    const requestBody: FindInstrumentRequest = {
+    const requestBody = {
       query: params.query,
       ...(params.instrumentKind && { instrumentKind: params.instrumentKind }),
     };
 
     const response = await firstValueFrom(
-      this.httpService.post<FindInstrumentResponse>(url, requestBody, {
+      this.httpService.post<FindInstrumentResponseDto>(url, requestBody, {
         headers,
       })
     );
