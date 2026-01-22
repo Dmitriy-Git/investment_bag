@@ -1,4 +1,4 @@
-import { Component, signal, effect } from '@angular/core';
+import { Component, signal, effect, afterNextRender, inject, DOCUMENT } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { HeaderComponent } from './header/header.component';
@@ -11,13 +11,18 @@ import { SidebarComponent } from './sidebar/sidebar.component';
   styleUrl: './layout.component.scss'
 })
 export class LayoutComponent {
+  private readonly document = inject(DOCUMENT);
+  
   protected readonly isCollapsed = signal(false);
   protected readonly sidebarTheme = signal<'light' | 'dark'>('light');
 
   constructor() {
-    effect(() => {
-      const theme = this.sidebarTheme();
-      document.documentElement.setAttribute('data-theme', theme);
+    // Используем afterNextRender для выполнения кода только в браузере (не в SSR)
+    afterNextRender(() => {
+      effect(() => {
+        const theme = this.sidebarTheme();
+        this.document.documentElement.setAttribute('data-theme', theme);
+      });
     });
   }
 }

@@ -7,7 +7,8 @@
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
-    "serve:ssr:investment-bag-client": "node dist/investment-bag-client/server/server.mjs"
+    "serve:ssr:investment-bag-client": "node dist/investment-bag-client/server/server.mjs",
+    "generate:api": "openapi-typescript http://localhost:3000/api-json -o src/app/models/api.types.ts"
   },
   "prettier": {
     "printWidth": 100,
@@ -47,6 +48,7 @@
     "@types/express": "^5.0.1",
     "@types/node": "^20.17.19",
     "jsdom": "^27.1.0",
+    "openapi-typescript": "^7.10.1",
     "typescript": "~5.9.2",
     "vitest": "^4.0.8"
   }

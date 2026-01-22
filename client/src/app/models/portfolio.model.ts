@@ -1,28 +1,6 @@
-// Типы данных (DTO) - соответствуют вашим серверным DTO
-export interface CreatePortfolioPositionDto {
-  instrumentId: string;
-  instrumentType: string;
-  quantity: number;
-  purchasePrice: number;
-  purchaseDate: string;
-  notes?: string;
-}
+// Реэкспорт типов из сгенерированного API файла
+import type { components } from './api.types';
 
-export interface UpdatePortfolioPositionDto {
-  quantity?: number;
-  purchasePrice?: number;
-  purchaseDate?: string;
-  notes?: string;
-}
-
-export interface PortfolioPosition {
-  id: number;
-  userId: number;
-  instrumentId: string;
-  instrumentType: string;
-  quantity: number;
-  purchasePrice: number;
-  purchaseDate: string;
-  notes?: string;
-  deletedAt?: string;
-}
+export type CreatePortfolioPositionDto = components['schemas']['CreatePortfolioPositionDto'];
+export type UpdatePortfolioPositionDto = components['schemas']['UpdatePortfolioPositionDto'];
+export type PortfolioPosition = components['schemas']['PortfolioResponseDto'];

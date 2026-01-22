@@ -1,5 +1,6 @@
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
+import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { AppModule } from './app.module';
 import { logger } from './common/logger.middleware';
 
@@ -22,6 +23,20 @@ async function bootstrap() {
       },
     }),
   );
+
+  // Swagger configuration
+  const config = new DocumentBuilder()
+    .setTitle('Investment Bag API')
+    .setDescription('API для управления инвестиционным портфелем')
+    .setVersion('1.0')
+    .addTag('users', 'Операции с пользователями')
+    .addTag('portfolio', 'Операции с портфелем')
+    .addTag('favorites', 'Избранные инструменты')
+    .build();
+
+  const document = SwaggerModule.createDocument(app, config);
+  SwaggerModule.setup('api', app, document);
+  
 
   await app.listen(3000);
   console.log('Server is running on http://localhost:3000');

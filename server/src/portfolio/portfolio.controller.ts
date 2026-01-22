@@ -10,10 +10,10 @@ import {
   UseFilters,
 } from '@nestjs/common';
 import { PortfolioService } from './portfolio.service';
-import { Portfolio } from '../generated/prisma/client.js';
 import { AllExceptionsFilter } from '../common/all-exception.filter';
 import { CreatePortfolioPositionDto } from './dto/create-portfolio-position.dto';
 import { UpdatePortfolioPositionDto } from './dto/update-portfolio-position.dto';
+import { PortfolioResponseDto } from './dto/portfolio-response.dto';
 
 @Controller('users/:userId/portfolio')
 @UseFilters(AllExceptionsFilter)
@@ -30,7 +30,7 @@ export class PortfolioController {
   async addPosition(
     @Param('userId', ParseIntPipe) userId: number,
     @Body() body: CreatePortfolioPositionDto,
-  ): Promise<Portfolio> {
+  ): Promise<PortfolioResponseDto> {
     return this.portfolioService.addPosition(userId, body);
   }
 
@@ -42,7 +42,7 @@ export class PortfolioController {
   @Get()
   async getPortfolio(
     @Param('userId', ParseIntPipe) userId: number,
-  ): Promise<Portfolio[]> {
+  ): Promise<PortfolioResponseDto[]> {
     return this.portfolioService.getPortfolio(userId);
   }
 
@@ -58,7 +58,7 @@ export class PortfolioController {
     @Param('userId', ParseIntPipe) userId: number,
     @Param('id', ParseIntPipe) positionId: number,
     @Body() body: UpdatePortfolioPositionDto,
-  ): Promise<Portfolio> {
+  ): Promise<PortfolioResponseDto> {
     return this.portfolioService.updatePosition(userId, positionId, body);
   }
 
@@ -72,7 +72,7 @@ export class PortfolioController {
   async closePosition(
     @Param('userId', ParseIntPipe) userId: number,
     @Param('id', ParseIntPipe) positionId: number,
-  ): Promise<Portfolio> {
+  ): Promise<PortfolioResponseDto> {
     return this.portfolioService.closePosition(userId, positionId);
   }
 }
