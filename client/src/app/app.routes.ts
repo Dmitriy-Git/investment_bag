@@ -23,6 +23,12 @@ export const routes: Routes = [
         loadComponent: () => 
           import('./favorites/favorites.component')
             .then(m => m.FavoritesComponent)
+      },
+      {
+        path: 'instruments',
+        loadComponent: () => 
+          import('./instruments/instruments.component')
+            .then(m => m.InstrumentsComponent)
       }
     ]
   }

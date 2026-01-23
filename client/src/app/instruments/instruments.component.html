@@ -1,0 +1,34 @@
+<div class="instruments-container">
+  <div class="instruments-card">
+    <!-- Header -->
+    <div class="instruments-header">
+      <div class="header-left">
+        <app-category-toggle
+          [selectedCategory]="selectedCategory()"
+          (categoryChange)="onCategoryChange($event)" />
+      </div>
+      <div class="header-right">
+        <button mat-button disabled>
+          <mat-icon>sort</mat-icon>
+          Sort
+        </button>
+        <button mat-button disabled>
+          <mat-icon>filter_list</mat-icon>
+          Filter
+        </button>
+      </div>
+    </div>
+
+    <!-- Table with pagination -->
+    <app-instruments-table
+      [data]="tableData()"
+      [columns]="displayedColumns()"
+      [isLoading]="isLoading()"
+      [errorMessage]="errorMessage()"
+      [totalCount]="totalCount()"
+      [pageSize]="pageSize()"
+      [pageIndex]="currentPage() - 1"
+      (pageChange)="onPageChange($event)"
+      (reload)="reload()" />
+  </div>
+</div>

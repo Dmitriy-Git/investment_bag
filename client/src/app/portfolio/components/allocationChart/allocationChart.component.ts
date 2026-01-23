@@ -23,7 +23,7 @@ export class AllocationChartComponent {
 
     // Группируем позиции по инструментам и рассчитываем общую стоимость
     const instrumentGroups = positions.reduce((acc, position) => {
-      const totalValue = position.quantity * position.purchasePrice;
+      const totalValue = Number(position.quantity) * Number(position.purchasePrice);
       if (acc[position.instrumentId]) {
         acc[position.instrumentId].value += totalValue;
       } else {

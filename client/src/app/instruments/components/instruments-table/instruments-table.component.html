@@ -1,0 +1,96 @@
+<!-- Loading State -->
+@if (isLoading()) {
+  <div class="loading-container">
+    <mat-spinner diameter="48"></mat-spinner>
+    <p>Загрузка инструментов...</p>
+  </div>
+}
+
+<!-- Error State -->
+@if (errorMessage(); as error) {
+  <div class="error-container">
+    <mat-icon>error_outline</mat-icon>
+    <p>{{ error }}</p>
+    <button mat-button (click)="onReload()">
+      Повторить
+    </button>
+  </div>
+}
+
+<!-- Table -->
+@if (!isLoading() && !errorMessage()) {
+  <div class="table-container">
+    <table mat-table [dataSource]="data()" class="instruments-table">
+      <!-- UID Column -->
+      <ng-container matColumnDef="uid">
+        <th mat-header-cell *matHeaderCellDef>UID</th>
+        <td mat-cell *matCellDef="let row">
+          <span class="uid-cell">{{ row.uid }}</span>
+        </td>
+      </ng-container>
+
+      <!-- Ticker Column -->
+      <ng-container matColumnDef="ticker">
+        <th mat-header-cell *matHeaderCellDef>Тикер</th>
+        <td mat-cell *matCellDef="let row">
+          <span class="ticker-cell">{{ row.ticker }}</span>
+        </td>
+      </ng-container>
+
+      <!-- Name Column -->
+      <ng-container matColumnDef="name">
+        <th mat-header-cell *matHeaderCellDef>Название</th>
+        <td mat-cell *matCellDef="let row">{{ row.name }}</td>
+      </ng-container>
+
+      <!-- Sector Column (only for shares) -->
+      <ng-container matColumnDef="sector">
+        <th mat-header-cell *matHeaderCellDef>Сектор</th>
+        <td mat-cell *matCellDef="let row">{{ row.sector || '—' }}</td>
+      </ng-container>
+
+      <!-- Currency Column -->
+      <ng-container matColumnDef="currency">
+        <th mat-header-cell *matHeaderCellDef>Валюта</th>
+        <td mat-cell *matCellDef="let row">{{ row.currency }}</td>
+      </ng-container>
+
+      <!-- Lot Column -->
+      <ng-container matColumnDef="lot">
+        <th mat-header-cell *matHeaderCellDef>Лот</th>
+        <td mat-cell *matCellDef="let row">{{ row.lot }}</td>
+      </ng-container>
+
+      <!-- Trading Status Column -->
+      <ng-container matColumnDef="tradingStatus">
+        <th mat-header-cell *matHeaderCellDef>Статус</th>
+        <td mat-cell *matCellDef="let row">
+          <span class="status-badge" [class]="stateService.getStatusClass(row.tradingStatus)">
+            {{ stateService.getStatusLabel(row.tradingStatus) }}
+          </span>
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="columns()"></tr>
+      <tr mat-row *matRowDef="let row; columns: columns()"></tr>
+
+      <!-- Empty State -->
+      <tr class="mat-row" *matNoDataRow>
+        <td class="mat-cell empty-row" [attr.colspan]="columns().length">
+          Инструменты не найдены
+        </td>
+      </tr>
+    </table>
+  </div>
+
+  <!-- Pagination -->
+  <mat-paginator
+    [length]="totalCount()"
+    [pageSize]="pageSize()"
+    [pageIndex]="pageIndex()"
+    [pageSizeOptions]="[10, 25, 50, 100]"
+    (page)="onPageChange($event)"
+    showFirstLastButtons
+    aria-label="Выберите страницу">
+  </mat-paginator>
+}

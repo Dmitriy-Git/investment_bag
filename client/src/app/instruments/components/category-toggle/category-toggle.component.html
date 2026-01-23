@@ -1,0 +1,10 @@
+<mat-button-toggle-group
+  [value]="selectedCategory()"
+  (change)="onCategoryChange($event.value)"
+  aria-label="Выберите категорию инструментов">
+  @for (category of categories; track category.value) {
+    <mat-button-toggle [value]="category.value">
+      {{ category.label }}
+    </mat-button-toggle>
+  }
+</mat-button-toggle-group>

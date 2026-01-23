@@ -42,6 +42,11 @@ export class SidebarComponent {
       icon: 'star',
       route: ROUTES.FAVORITES,
     },
+    {
+      title: 'Инструменты',
+      icon: 'category',
+      route: ROUTES.INSTRUMENTS,
+    },
   ];
 
   onThemeToggle(): void {

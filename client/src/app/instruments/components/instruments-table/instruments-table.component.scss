@@ -1,0 +1,175 @@
+// Loading State
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 64px 24px;
+  gap: 16px;
+
+  p {
+    color: #666;
+    margin: 0;
+  }
+}
+
+// Error State
+.error-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 64px 24px;
+  gap: 16px;
+  color: #d32f2f;
+
+  mat-icon {
+    font-size: 48px;
+    width: 48px;
+    height: 48px;
+  }
+
+  p {
+    margin: 0;
+  }
+}
+
+// Table
+.table-container {
+  overflow-y: auto;
+  overflow-x: auto;
+  max-width: 100%;
+
+  // Динамическая высота: 100vh минус header, padding, tabs, paginator
+  max-height: calc(100vh - 280px);
+}
+
+// Медиазапросы для разных высот экрана
+@media (max-height: 800px) {
+  .table-container {
+    max-height: calc(100vh - 250px);
+  }
+}
+
+@media (max-height: 600px) {
+  .table-container {
+    max-height: calc(100vh - 220px);
+  }
+}
+
+@media (min-height: 1000px) {
+  .table-container {
+    max-height: calc(100vh - 300px);
+  }
+}
+
+.instruments-table {
+  width: 100%;
+  min-width: 900px;
+
+  th.mat-header-cell {
+    color: #666;
+    font-weight: 500;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 16px;
+    background: #fafafa;
+    white-space: nowrap;
+  }
+
+  td.mat-cell {
+    padding: 16px;
+    border-bottom: 1px solid #f0f0f0;
+    white-space: nowrap;
+  }
+
+  tr.mat-row:hover {
+    background: #f9f9f9;
+  }
+
+  .uid-cell {
+    font-family: monospace;
+    font-size: 11px;
+    color: #666;
+  }
+
+  .ticker-cell {
+    font-weight: 600;
+    color: #1976d2;
+  }
+
+  .empty-row {
+    text-align: center;
+    padding: 48px 16px;
+    color: #999;
+  }
+}
+
+// Status Badge
+.status-badge {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 16px;
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+
+  &.status-active {
+    background: #e8f5e9;
+    color: #2e7d32;
+  }
+
+  &.status-inactive {
+    background: #ffebee;
+    color: #c62828;
+  }
+
+  &.status-default {
+    background: #e3f2fd;
+    color: #1565c0;
+  }
+}
+
+// Paginator
+mat-paginator {
+  border-top: 1px solid #eee;
+}
+
+// Dark theme support
+:host-context(.is-theme-dark) {
+  .loading-container p {
+    color: #aaa;
+  }
+
+  .instruments-table {
+    th.mat-header-cell {
+      color: #aaa;
+      background: #252525;
+    }
+
+    td.mat-cell {
+      border-bottom-color: #333;
+    }
+
+    tr.mat-row:hover {
+      background: #2a2a2a;
+    }
+
+    .uid-cell {
+      color: #888;
+    }
+
+    .ticker-cell {
+      color: #64b5f6;
+    }
+
+    .empty-row {
+      color: #666;
+    }
+  }
+
+  mat-paginator {
+    border-top-color: #333;
+  }
+}

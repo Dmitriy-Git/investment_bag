@@ -1,0 +1,55 @@
+.instruments-container {
+  padding: 24px;
+  max-width: 100%;
+  overflow: hidden;
+}
+
+.instruments-card {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+}
+
+// Header
+.instruments-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 24px;
+  border-bottom: 1px solid #eee;
+  flex-wrap: wrap;
+  gap: 16px;
+
+  .header-left {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .header-right {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    button {
+      color: #666;
+    }
+  }
+}
+
+// Dark theme support
+:host-context(.is-theme-dark) {
+  .instruments-card {
+    background: #1e1e1e;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  }
+
+  .instruments-header {
+    border-bottom-color: #333;
+
+    .header-right button {
+      color: #aaa;
+    }
+  }
+}
