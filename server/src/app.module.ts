@@ -4,19 +4,21 @@ import { UserModule } from "./user/user.module";
 import { FavoriteModule } from "./favorite/favorite.module";
 import { TInvestModule } from "./t-invest/t-invest.module";
 import { PortfolioModule } from "./portfolio/portfolio.module";
+import { AgentModule } from "./agent/agent.module";
 import { PrismaService } from "./common/prisma.service";
 
 @Global()
 @Module({
   imports: [
     ConfigModule.forRoot({
-      isGlobal: true, // делает ConfigModule глобальным, доступным во всех модулях
-      envFilePath: ".env", // путь к файлу .env
+      isGlobal: true,
+      envFilePath: ".env",
     }),
     UserModule,
     FavoriteModule,
     TInvestModule,
     PortfolioModule,
+    AgentModule,
   ],
   providers: [PrismaService],
   exports: [PrismaService],

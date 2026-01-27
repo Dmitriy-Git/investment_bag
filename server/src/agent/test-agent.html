@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Agent Test</title>
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+
+        #messages {
+            height: 400px;
+            overflow: auto;
+            border: 1px solid #ccc;
+            padding: 10px;
+            margin-bottom: 10px;
+            background: #f9f9f9;
+        }
+
+        .msg {
+            margin: 5px 0;
+            padding: 5px;
+        }
+
+        .user {
+            color: blue;
+        }
+
+        .bot {
+            color: green;
+        }
+
+        .tool {
+            color: orange;
+            font-style: italic;
+        }
+
+        .error {
+            color: red;
+        }
+
+        input {
+            width: 80%;
+            padding: 8px;
+        }
+
+        button {
+            padding: 8px 16px;
+        }
+    </style>
+</head>
+
+<body>
+    <h2>🤖 Agent Chat Test</h2>
+    <div id="status">Connecting...</div>
+    <div id="messages"></div>
+    <input id="input" type="text" placeholder="Введите сообщение...">
+    <button onclick="send()">Send</button>
+
+    <script>
+        const socket = io('http://localhost:3000/agent');
+        const messages = document.getElementById('messages');
+        const status = document.getElementById('status');
+        const input = document.getElementById('input');
+        let currentResponse = '';
+
+        socket.on('connect', () => {
+            status.textContent = '✅ Connected';
+            status.style.color = 'green';
+        });
+
+        socket.on('disconnect', () => {
+            status.textContent = '❌ Disconnected';
+            status.style.color = 'red';
+        });
+
+        socket.on('connected', (data) => {
+            log('System', 'Connected with ID: ' + data.id, 'tool');
+        });
+
+        socket.on('stream', (event) => {
+            console.log('Stream event:', event);
+
+            if (event.type === 'token') {
+                currentResponse += event.content;
+                updateStreaming(currentResponse);
+            } else if (event.type === 'tool_start') {
+                log('Tool', '🔧 Calling: ' + event.toolName, 'tool');
+            } else if (event.type === 'tool_end') {
+                log('Tool', '✅ ' + event.toolName + ': ' + event.content, 'tool');
+            } else if (event.type === 'done') {
+                finalizeStreaming();
+                currentResponse = '';
+            } else if (event.type === 'error') {
+                log('Error', event.content, 'error');
+                currentResponse = '';
+            }
+        });
+
+        socket.on('error', (data) => {
+            log('Error', data.message, 'error');
+        });
+
+        function send() {
+            const msg = input.value.trim();
+            if (!msg) return;
+
+            log('You', msg, 'user');
+            socket.emit('message', { userId: 2, message: msg });
+            input.value = '';
+        }
+
+        function log(sender, text, type) {
+            const div = document.createElement('div');
+            div.className = 'msg ' + type;
+            div.innerHTML = '<strong>' + sender + ':</strong> ' + text;
+            messages.appendChild(div);
+            messages.scrollTop = messages.scrollHeight;
+        }
+
+        function updateStreaming(text) {
+            let streaming = document.getElementById('streaming');
+            if (!streaming) {
+                streaming = document.createElement('div');
+                streaming.id = 'streaming';
+                streaming.className = 'msg bot';
+                messages.appendChild(streaming);
+            }
+            streaming.innerHTML = '<strong>Agent:</strong> ' + text;
+            messages.scrollTop = messages.scrollHeight;
+        }
+
+        function finalizeStreaming() {
+            const streaming = document.getElementById('streaming');
+            if (streaming) {
+                streaming.removeAttribute('id');
+            }
+        }
+
+        input.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') send();
+        });
+    </script>
+</body>
+
+</html>
