@@ -9,7 +9,7 @@ import {
 } from '@nestjs/websockets';
 import { Logger } from '@nestjs/common';
 import { Server, Socket } from 'socket.io';
-import { CreateAgentService } from './createAgent.service';
+import { AgentService } from './agent.service';
 import { ChatMessageDto } from './dto/chat-message.dto';
 
 @WebSocketGateway({
@@ -22,7 +22,7 @@ export class AgentGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer()
   server: Server;
 
-  constructor(private readonly agentService: CreateAgentService) {}
+  constructor(private readonly agentService: AgentService) {}
 
   handleConnection(client: Socket) {
     this.logger.log(`Client connected: ${client.id}`);

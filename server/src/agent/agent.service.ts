@@ -1,92 +1,54 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { ChatOpenAI } from '@langchain/openai';
-import {
-  HumanMessage,
-  SystemMessage,
-  ToolMessage,
-  BaseMessage,
-} from '@langchain/core/messages';
-import { Subject } from 'rxjs';
+import { HumanMessage } from '@langchain/core/messages';
+import { createAgent } from 'langchain';
+import { tool } from '@langchain/core/tools';
+import { z } from 'zod';
 import { PortfolioService } from '../portfolio/portfolio.service';
 import { FavoriteService } from '../favorite/favorite.service';
 import { TInvestService } from '../t-invest/t-invest.service';
+
+/**
+ * Схема структурированного ответа инвестиционного помощника
+ */
+export const InvestmentResponseSchema = z.object({
+  answer: z.string().describe('Основной текст ответа пользователю'),
+  confidence: z
+    .enum(['high', 'medium', 'low'])
+    .describe('Уверенность в ответе'),
+  actionType: z
+    .enum(['info', 'recommendation', 'warning', 'analysis'])
+    .describe('Тип ответа'),
+  relatedInstruments: z
+    .array(
+      z.object({
+        ticker: z.string().describe('Тикер инструмента'),
+        name: z.string().optional().describe('Название инструмента'),
+        uid: z.string().optional().describe('UID инструмента'),
+      }),
+    )
+    .optional()
+    .describe('Связанные финансовые инструменты'),
+  suggestedActions: z
+    .array(z.string())
+    .optional()
+    .describe('Рекомендуемые действия для пользователя'),
+});
+
+export type InvestmentResponse = z.infer<typeof InvestmentResponseSchema>;
 
 export interface StreamEvent {
   type: 'token' | 'done' | 'error' | 'tool_start' | 'tool_end';
   content?: string;
   toolName?: string;
-}
-
-interface ToolCall {
-  id: string;
-  name: string;
-  args: Record<string, unknown>;
+  structuredResponse?: InvestmentResponse;
 }
 
 @Injectable()
 export class AgentService {
   private readonly logger = new Logger(AgentService.name);
-  private readonly model: ReturnType<ChatOpenAI['bindTools']>;
-
-  private readonly tools = [
-    {
-      type: 'function' as const,
-      function: {
-        name: 'getPortfolio',
-        description: 'Получить инвестиционный портфель пользователя',
-        parameters: {
-          type: 'object',
-          properties: {
-            userId: { type: 'number', description: 'ID пользователя' },
-          },
-          required: ['userId'],
-        },
-      },
-    },
-    {
-      type: 'function' as const,
-      function: {
-        name: 'getFavorites',
-        description: 'Получить список избранных инструментов пользователя',
-        parameters: {
-          type: 'object',
-          properties: {
-            userId: { type: 'number', description: 'ID пользователя' },
-          },
-          required: ['userId'],
-        },
-      },
-    },
-    {
-      type: 'function' as const,
-      function: {
-        name: 'searchInstruments',
-        description: 'Поиск финансовых инструментов по названию или тикеру',
-        parameters: {
-          type: 'object',
-          properties: {
-            query: { type: 'string', description: 'Поисковый запрос' },
-          },
-          required: ['query'],
-        },
-      },
-    },
-    {
-      type: 'function' as const,
-      function: {
-        name: 'getShareInfo',
-        description: 'Получить детальную информацию об акции по её UID',
-        parameters: {
-          type: 'object',
-          properties: {
-            uid: { type: 'string', description: 'UID акции' },
-          },
-          required: ['uid'],
-        },
-      },
-    },
-  ];
+  private agent: ReturnType<typeof createAgent>;
 
   private readonly systemPrompt = `Ты - инвестиционный помощник для приложения Investment Bag.
 
@@ -114,172 +76,197 @@ export class AgentService {
       this.logger.warn('OPENAI_API_KEY not configured');
     }
 
-    this.model = new ChatOpenAI({
+    const model = new ChatOpenAI({
       modelName: 'gpt-4o-mini',
       temperature: 0.7,
       openAIApiKey: apiKey,
-    }).bindTools(this.tools);
+    });
 
+    this.agent = createAgent({
+      model,
+      tools: this.createTools(),
+      systemPrompt: this.systemPrompt,
+      responseFormat: InvestmentResponseSchema,
+    });
   }
+
+  private createTools() {
+    const getPortfolioTool = tool(
+      async ({ userId }) => {
+        this.logger.debug(`Executing getPortfolio for userId: ${userId}`);
+        const portfolio = await this.portfolioService.getPortfolio(userId);
+
+        if (portfolio.length === 0) {
+          return 'Портфель пуст.';
+        }
+
+        return portfolio
+          .map(
+            (p, i) =>
+              `${i + 1}. ${p.instrumentType} | ID: ${p.instrumentId} | Кол-во: ${p.quantity} | Цена покупки: ${p.purchasePrice}`,
+          )
+          .join('\n');
+      },
+      {
+        name: 'getPortfolio',
+        description: 'Получить инвестиционный портфель пользователя',
+        schema: z.object({
+          userId: z.number().describe('ID пользователя'),
+        }),
+      },
+    );
+
+    const getFavoritesTool = tool(
+      async ({ userId }) => {
+        this.logger.debug(`Executing getFavorites for userId: ${userId}`);
+        const favorites = await this.favoriteService.getFavorites(userId);
+
+        if (favorites.length === 0) {
+          return 'Избранное пусто.';
+        }
+
+        return favorites
+          .map((f, i) => `${i + 1}. ${f.instrumentType}: ${f.instrumentId}`)
+          .join('\n');
+      },
+      {
+        name: 'getFavorites',
+        description: 'Получить список избранных инструментов пользователя',
+        schema: z.object({
+          userId: z.number().describe('ID пользователя'),
+        }),
+      },
+    );
+
+    const searchInstrumentsTool = tool(
+      async ({ query }) => {
+        this.logger.debug(`Executing searchInstruments for query: ${query}`);
+        const result = await this.tInvestService.findInstrument({ query });
+
+        if (!result.instruments?.length) {
+          return `По запросу "${query}" ничего не найдено.`;
+        }
+
+        return result.instruments
+          .slice(0, 5)
+          .map(
+            (inst, i) =>
+              `${i + 1}. ${inst.name} (${inst.ticker}) - ${inst.instrumentKind ?? 'N/A'} | UID: ${inst.uid}`,
+          )
+          .join('\n');
+      },
+      {
+        name: 'searchInstruments',
+        description: 'Поиск финансовых инструментов по названию или тикеру',
+        schema: z.object({
+          query: z.string().describe('Поисковый запрос'),
+        }),
+      },
+    );
+
+    const getShareInfoTool = tool(
+      async ({ uid }) => {
+        this.logger.debug(`Executing getShareInfo for uid: ${uid}`);
+        const share = await this.tInvestService.getShareBy({ id: uid });
+
+        return `${share.name} (${share.ticker})
+          Сектор: ${share.sector}
+          Валюта: ${share.currency}
+          Лот: ${share.lot}
+          ISIN: ${share.isin}`;
+      },
+      {
+        name: 'getShareInfo',
+        description: 'Получить детальную информацию об акции по её UID',
+        schema: z.object({
+          uid: z.string().describe('UID акции'),
+        }),
+      },
+    );
+
+    return [
+      getPortfolioTool,
+      getFavoritesTool,
+      searchInstrumentsTool,
+      getShareInfoTool,
+    ];
+  }
+
   /**
-   * Выполняет tool по имени
+   * Простой вызов без стриминга — возвращает структурированный ответ
    */
-  private async executeTool(name: string, args: Record<string, unknown>): Promise<string> {
-    this.logger.debug(`Executing tool: ${name}, args: ${JSON.stringify(args)}`);
+  async chat(userId: number, message: string): Promise<InvestmentResponse> {
+    this.logger.debug(`Chat request from user ${userId}: ${message}`);
 
     try {
-      switch (name) {
-        case 'getPortfolio':
-          return await this.getPortfolio(args.userId as number);
+      const result = await this.agent.invoke({
+        messages: [new HumanMessage(`userId: ${userId}\n\n${message}`)],
+      });
 
-        case 'getFavorites':
-          return await this.getFavorites(args.userId as number);
-
-        case 'searchInstruments':
-          return await this.searchInstruments(args.query as string);
-
-        case 'getShareInfo':
-          return await this.getShareInfo(args.uid as string);
-
-        default:
-          return `Unknown tool: ${name}`;
-      }
+      return result.structuredResponse as InvestmentResponse;
     } catch (error) {
-      this.logger.error(`Tool ${name} error`, error);
-      return `Ошибка выполнения ${name}`;
+      this.logger.error('Chat error', error);
+      throw error;
     }
   }
 
-  private async getPortfolio(userId: number): Promise<string> {
-    const portfolio = await this.portfolioService.getPortfolio(userId);
-
-    if (portfolio.length === 0) {
-      return 'Портфель пуст.';
-    }
-
-    return portfolio
-      .map(
-        (p, i) =>
-          `${i + 1}. ${p.instrumentType} | ID: ${p.instrumentId} | Кол-во: ${p.quantity} | Цена покупки: ${p.purchasePrice}`,
-      )
-      .join('\n');
-  }
-
-  private async getFavorites(userId: number): Promise<string> {
-    const favorites = await this.favoriteService.getFavorites(userId);
-
-    if (favorites.length === 0) {
-      return 'Избранное пусто.';
-    }
-
-    return favorites
-      .map((f, i) => `${i + 1}. ${f.instrumentType}: ${f.instrumentId}`)
-      .join('\n');
-  }
-
-  private async searchInstruments(query: string): Promise<string> {
-    const result = await this.tInvestService.findInstrument({ query });
-
-    if (!result.instruments?.length) {
-      return `По запросу "${query}" ничего не найдено.`;
-    }
-
-    return result.instruments
-      .slice(0, 5)
-      .map(
-        (inst, i) =>
-          `${i + 1}. ${inst.name} (${inst.ticker}) - ${inst.instrumentKind ?? 'N/A'} | UID: ${inst.uid}`,
-      )
-      .join('\n');
-  }
-
-  private async getShareInfo(uid: string): Promise<string> {
-    const share = await this.tInvestService.getShareBy({ id: uid });
-
-    return `${share.name} (${share.ticker})
-      Сектор: ${share.sector}
-      Валюта: ${share.currency}
-      Лот: ${share.lot}
-      ISIN: ${share.isin}`;
-  }
-
-  async chat(userId: number, message: string): Promise<Subject<StreamEvent>> {
-    const stream$ = new Subject<StreamEvent>();
-    this.processChat(userId, message, stream$);
-
-    return stream$;
-  }
-
-  private async processChat(
+  /**
+   * Со стримингом — генератор событий для WebSocket
+   * Возвращает структурированный ответ в событии 'done'
+   */
+  async *chatStream(
     userId: number,
     message: string,
-    stream$: Subject<StreamEvent>,
-  ) {
+  ): AsyncGenerator<StreamEvent> {
+    this.logger.debug(`Chat stream request from user ${userId}: ${message}`);
+
     try {
-      const messages: BaseMessage[] = [
-        new SystemMessage(this.systemPrompt + `\n\nТекущий userId: ${userId}`),
-        new HumanMessage(message),
-      ];
+      const stream = await this.agent.stream({
+        messages: [new HumanMessage(`userId: ${userId}\n\n${message}`)],
+      });
 
-      let iterations = 0;
-      const maxIterations = 5;
+      let fullContent = '';
+      let structuredResponse: InvestmentResponse | undefined;
 
-      while (iterations < maxIterations) {
-        iterations++;
-
-        const response = await this.model.invoke(messages);
-
-        const toolCalls = response.tool_calls as ToolCall[] | undefined;
-
-        // No tool calls - stream final response
-        if (!toolCalls || toolCalls.length === 0) {
-          const finalStream = await this.model.stream(messages);
-          let fullContent = '';
-
-          for await (const chunk of finalStream) {
-            const content = chunk.content as string;
-            if (content) {
+      for await (const chunk of stream) {
+        // Обработка ответа модели (AIMessage)
+        if (chunk.model_request?.messages) {
+          for (const msg of chunk.model_request.messages) {
+            if (msg.content) {
+              const content = msg.content as string;
               fullContent += content;
-              stream$.next({ type: 'token', content });
+              yield { type: 'token', content };
+            }
+
+            // Если есть tool_calls — агент хочет вызвать инструмент
+            if (msg.tool_calls?.length) {
+              for (const tc of msg.tool_calls) {
+                yield {
+                  type: 'tool_start',
+                  toolName: tc.name,
+                };
+              }
             }
           }
-
-          stream$.next({ type: 'done', content: fullContent });
-          break;
         }
 
-        // Execute tool calls
-        messages.push(response);
-
-        for (const tc of toolCalls) {
-          stream$.next({ type: 'tool_start', toolName: tc.name });
-
-          const result = await this.executeTool(tc.name, tc.args);
-
-          messages.push(
-            new ToolMessage({
-              content: result,
-              tool_call_id: tc.id,
-            }),
-          );
-
-          stream$.next({
-            type: 'tool_end',
-            toolName: tc.name,
-            content: result,
-          });
+        // Получаем структурированный ответ из финального чанка
+        if (chunk.structuredResponse) {
+          structuredResponse = chunk.structuredResponse as InvestmentResponse;
         }
       }
 
-      stream$.complete();
+      yield {
+        type: 'done',
+        content: structuredResponse?.answer ?? fullContent,
+        structuredResponse,
+      };
     } catch (error) {
-      this.logger.error('Chat processing error', error);
-
-      stream$.next({
+      this.logger.error('Chat stream error', error);
+      yield {
         type: 'error',
         content: error instanceof Error ? error.message : 'Unknown error',
-      });
-      stream$.complete();
+      };
     }
   }
 }
