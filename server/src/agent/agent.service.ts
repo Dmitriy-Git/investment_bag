@@ -5,6 +5,7 @@ import { HumanMessage } from '@langchain/core/messages';
 import { createAgent } from 'langchain';
 import { tool } from '@langchain/core/tools';
 import { z } from 'zod';
+import { MemorySaver } from '@langchain/langgraph';
 import { PortfolioService } from '../portfolio/portfolio.service';
 import { FavoriteService } from '../favorite/favorite.service';
 import { TInvestService } from '../t-invest/t-invest.service';
@@ -49,6 +50,7 @@ export interface StreamEvent {
 export class AgentService {
   private readonly logger = new Logger(AgentService.name);
   private agent: ReturnType<typeof createAgent>;
+  private readonly checkpointer = new MemorySaver();
 
   private readonly systemPrompt = `Ты - инвестиционный помощник для приложения Investment Bag.
 
@@ -87,6 +89,7 @@ export class AgentService {
       tools: this.createTools(),
       systemPrompt: this.systemPrompt,
       responseFormat: InvestmentResponseSchema,
+      checkpointer: this.checkpointer,
     });
   }
 
@@ -195,13 +198,22 @@ export class AgentService {
   /**
    * Простой вызов без стриминга — возвращает структурированный ответ
    */
-  async chat(userId: number, message: string): Promise<InvestmentResponse> {
-    this.logger.debug(`Chat request from user ${userId}: ${message}`);
+  async chat(
+    userId: number,
+    message: string,
+    threadId: string,
+  ): Promise<InvestmentResponse> {
+    this.logger.debug(`Chat request [thread: ${threadId}]: ${message}`);
 
     try {
-      const result = await this.agent.invoke({
-        messages: [new HumanMessage(`userId: ${userId}\n\n${message}`)],
-      });
+      const result = await this.agent.invoke(
+        {
+          messages: [new HumanMessage(`userId: ${userId}\n\n${message}`)],
+        },
+        {
+          configurable: { thread_id: threadId },
+        },
+      );
 
       return result.structuredResponse as InvestmentResponse;
     } catch (error) {
@@ -217,13 +229,19 @@ export class AgentService {
   async *chatStream(
     userId: number,
     message: string,
+    threadId: string,
   ): AsyncGenerator<StreamEvent> {
-    this.logger.debug(`Chat stream request from user ${userId}: ${message}`);
+    this.logger.debug(`Chat stream [thread: ${threadId}]: ${message}`);
 
     try {
-      const stream = await this.agent.stream({
-        messages: [new HumanMessage(`userId: ${userId}\n\n${message}`)],
-      });
+      const stream = await this.agent.stream(
+        {
+          messages: [new HumanMessage(`userId: ${userId}\n\n${message}`)],
+        },
+        {
+          configurable: { thread_id: threadId },
+        },
+      );
 
       let fullContent = '';
       let structuredResponse: InvestmentResponse | undefined;

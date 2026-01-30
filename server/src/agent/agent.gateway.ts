@@ -18,6 +18,7 @@ import { ChatMessageDto } from './dto/chat-message.dto';
 })
 export class AgentGateway implements OnGatewayConnection, OnGatewayDisconnect {
   private readonly logger = new Logger(AgentGateway.name);
+  private readonly threadId = 'main-thread';
 
   @WebSocketServer()
   server: Server;
@@ -43,10 +44,10 @@ export class AgentGateway implements OnGatewayConnection, OnGatewayDisconnect {
     );
 
     try {
-      // Используем AsyncGenerator вместо RxJS Subject
       for await (const event of this.agentService.chatStream(
         payload.userId,
         payload.message,
+        this.threadId,
       )) {
         client.emit('stream', event);
       }

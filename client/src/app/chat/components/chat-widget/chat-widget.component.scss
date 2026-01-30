@@ -1,0 +1,32 @@
+:host {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 1000;
+}
+
+.chat-fab {
+  position: relative;
+  background-color: var(--active-text);
+  color: white;
+  transition: transform 0.2s ease;
+
+  &:hover {
+    transform: scale(1.05);
+  }
+
+  &.is-open {
+    background-color: var(--text-secondary);
+  }
+}
+
+.connection-indicator {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 10px;
+  height: 10px;
+  background-color: #4caf50;
+  border-radius: 50%;
+  border: 2px solid white;
+}

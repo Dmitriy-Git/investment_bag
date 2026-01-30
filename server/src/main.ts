@@ -25,6 +25,7 @@ async function bootstrap() {
   );
 
   // Swagger configuration
+  // http://localhost:3000/api#/
   const config = new DocumentBuilder()
     .setTitle('Investment Bag API')
     .setDescription('API для управления инвестиционным портфелем')

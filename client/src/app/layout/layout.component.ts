@@ -3,10 +3,11 @@ import { RouterOutlet } from '@angular/router';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { HeaderComponent } from './header/header.component';
 import { SidebarComponent } from './sidebar/sidebar.component';
+import { ChatWidgetComponent } from '../chat';
 
 @Component({
   selector: 'app-layout',
-  imports: [MatSidenavModule, RouterOutlet, HeaderComponent, SidebarComponent],
+  imports: [MatSidenavModule, RouterOutlet, HeaderComponent, SidebarComponent, ChatWidgetComponent],
   templateUrl: './layout.component.html',
   styleUrl: './layout.component.scss'
 })

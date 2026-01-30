@@ -1,0 +1,18 @@
+<!-- Плавающая кнопка -->
+<button
+  mat-fab
+  class="chat-fab"
+  [class.is-open]="isOpen()"
+  (click)="togglePanel()"
+  aria-label="Открыть чат с AI-помощником"
+>
+  <mat-icon>{{ isOpen() ? 'close' : 'chat' }}</mat-icon>
+  @if (!isOpen() && chatService.isConnected()) {
+    <span class="connection-indicator"></span>
+  }
+</button>
+
+<!-- Панель чата -->
+@if (isOpen()) {
+  <app-chat-panel (close)="isOpen.set(false)" />
+}
