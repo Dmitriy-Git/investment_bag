@@ -5,6 +5,7 @@ import { FavoriteModule } from "./favorite/favorite.module";
 import { TInvestModule } from "./t-invest/t-invest.module";
 import { PortfolioModule } from "./portfolio/portfolio.module";
 import { AgentModule } from "./agent/agent.module";
+import { AuthModule } from "./auth/auth.module";
 import { PrismaService } from "./common/prisma.service";
 
 @Global()
@@ -14,6 +15,7 @@ import { PrismaService } from "./common/prisma.service";
       isGlobal: true,
       envFilePath: ".env",
     }),
+    AuthModule,
     UserModule,
     FavoriteModule,
     TInvestModule,

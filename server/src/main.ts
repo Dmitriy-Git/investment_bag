@@ -3,10 +3,13 @@ import { ValidationPipe } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { AppModule } from './app.module';
 import { logger } from './common/logger.middleware';
+import { TimeoutInterceptor } from './common/timeout.interceptor';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+
   app.use(logger);
+  app.useGlobalInterceptors(new TimeoutInterceptor());
 
   app.enableCors({
     origin: '*',
