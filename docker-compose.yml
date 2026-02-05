@@ -1,0 +1,36 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: investment_bag
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  server:
+    build: ./server
+    ports:
+      - "3000:3000"
+    env_file:
+      - ./server/.env
+    environment:
+      # Override DATABASE_URL for Docker network
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/investment_bag
+    depends_on:
+      - postgres
+    command: sh -c "npx prisma migrate deploy && npm run start:prod"
+    
+  client:
+    build: ./client
+    ports:
+      - "4000:4000"
+    environment:
+      API_URL: http://server:3000
+    depends_on:
+      - server
+
+volumes:
+  postgres_data:
