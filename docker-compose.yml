@@ -11,6 +11,7 @@ services:
       - postgres_data:/var/lib/postgresql/data
 
   server:
+    # Ищи Dockerfile в папке server
     build: ./server
     ports:
       - "3000:3000"
@@ -21,8 +22,9 @@ services:
       DATABASE_URL: postgresql://postgres:postgres@postgres:5432/investment_bag
     depends_on:
       - postgres
+    # Переопределяет команду CMD из Dockerfile
     command: sh -c "npx prisma migrate deploy && npm run start:prod"
-    
+
   client:
     build: ./client
     ports:
